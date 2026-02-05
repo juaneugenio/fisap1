@@ -3,24 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flashlearn App</title>
+    <title>FlashLearn</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header>
-      <nav>
-        <h1 onclick="renderCategories()" style="cursor: pointer">FlashLearn</h1>
-        <div class="search-container">
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="Buscar en tarjetas..."
-          />
-          <button id="searchBtn">Buscar</button>
-          <button id="resetBtn">Limpiar</button>
+      <h1 onclick="location.reload()" style="cursor: pointer">FlashLearn</h1>
+      <a href="admin.html" class="nav-link">Dashboard</a>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search term..." />
+        <div class="btn-group">
+          <button class="btn" id="searchBtn">Search</button>
+          <button class="btn btn-home" id="resetBtn">Home</button>
         </div>
-        <a href="admin.html" class="admin-link">Dashboard 🔒</a>
-      </nav>
+      </div>
     </header>
 
     <main id="app-container"></main>
