@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flashlearn App</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <h1 onclick="renderCategories()" style="cursor: pointer">FlashLearn</h1>
+        <div class="search-container">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Buscar en tarjetas..."
+          />
+          <button id="searchBtn">Buscar</button>
+          <button id="resetBtn">Limpiar</button>
+        </div>
+        <a href="admin.html" class="admin-link">Dashboard 🔒</a>
+      </nav>
+    </header>
+
+    <main id="app-container"></main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

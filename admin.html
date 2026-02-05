@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Admin - FlashLearn</title>
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #2563eb;
+        --bg: #f1f5f9;
+      }
+      body {
+        font-family: sans-serif;
+        background: var(--bg);
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Login Simple */
+      #login-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      h2 {
+        color: var(--primary);
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      /* Contenedor del Editor */
+      #editor-container {
+        height: 200px;
+        margin-bottom: 20px;
+      }
+
+      .btn {
+        background: var(--primary);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .btn-cancel {
+        background: #64748b;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        color: white;
+        display: inline-block;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login-overlay">
+      <h2>Panel de Administración</h2>
+      <input
+        type="password"
+        id="passInput"
+        placeholder="Introduce la clave"
+        style="width: 250px; margin-bottom: 10px"
+      />
+      <button class="btn" onclick="checkPass()">Entrar</button>
+    </div>
+
+    <div class="container">
+      <a href="index.html" class="btn-cancel">← Volver a la App</a>
+      <h2>Crear Nueva Tarjeta</h2>
+
+      <form id="cardForm">
+        <div class="form-group">
+          <label>Título del Frente</label>
+          <input
+            type="text"
+            id="frontTitle"
+            placeholder="Ej: ¿Qué es un Sprint?"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Categoría</label>
+          <select id="categorySelect">
+            <option value="Projektmanagement">Projektmanagement</option>
+            <option value="Datenschutz">Datenschutz</option>
+            <option value="IT-Sicherheit">IT-Sicherheit</option>
+            <option value="Qualitätsmanagement">Qualitätsmanagement</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Etiquetas (Tags)</label>
+          <input
+            type="text"
+            id="tags"
+            placeholder="ej: agile, scrum, metodologías"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>URL de Imagen (Opcional)</label>
+          <input
+            type="text"
+            id="imageUrl"
+            placeholder="https://ejemplo.com/imagen.jpg"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Contenido del Reverso (Editor con Tablas/Formato)</label>
+          <div id="editor-container"></div>
+        </div>
+
+        <button type="submit" class="btn">Guardar Tarjeta</button>
+      </form>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+      // 1. Inicializar el Editor Enriquecido
+      var quill = new Quill("#editor-container", {
+        theme: "snow",
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ["bold", "italic", "underline"],
+            [{ color: [] }, { background: [] }],
+            [{ list: "ordered" }, { list: "bullet" }],
+            [{ align: [] }],
+            ["blockquote", "code-block", "code"],
+            ["link", "image"],
+            ["clean"], // botón para quitar formato
+          ],
+        },
+      });
+
+      // 2. Lógica de Login (Clave simulada: 1234)
+      function checkPass() {
+        const pass = document.getElementById("passInput").value;
+        if (pass === "1234") {
+          document.getElementById("login-overlay").classList.add("hidden");
+        } else {
+          alert("Clave incorrecta");
+        }
+      }
+
+      // 3. Manejo del Formulario
+      document.getElementById("cardForm").onsubmit = function (e) {
+        e.preventDefault();
+
+        // Extraer el contenido HTML del editor (incluyendo tablas/listas)
+        const richText = quill.root.innerHTML;
+
+        const newCard = {
+          title: document.getElementById("frontTitle").value,
+          category: document.getElementById("categorySelect").value,
+          tags: document.getElementById("tags").value,
+          image: document.getElementById("imageUrl").value,
+          backContent: richText,
+        };
+
+        console.log("Tarjeta lista para guardar:", newCard);
+        alert("¡Tarjeta capturada! (Ahora faltaría enviarla a Supabase)");
+      };
+    </script>
+  </body>
+</html>
