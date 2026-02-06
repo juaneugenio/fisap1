@@ -9,45 +9,6 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
-    <style>
-      /* Estilos específicos para el Modal */
-      #modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.8);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 3000;
-      }
-      .modal {
-        background: var(--card-bg);
-        border: 2px solid var(--accent);
-        padding: 30px;
-        border-radius: 12px;
-        max-width: 400px;
-        width: 90%;
-        text-align: center;
-      }
-      .modal h3 {
-        color: var(--accent);
-        margin-top: 0;
-      }
-      .modal .btn-group {
-        margin-top: 20px;
-      }
-
-      /* Botón de Cancelar */
-      .btn-cancel {
-        background: var(--brown);
-        color: white;
-      }
-
-      /* Error highlight */
-      .field-error {
-        border: 2px solid #ff4444 !important;
-      }
-    </style>
   </head>
   <body>
     <div id="login-overlay">
@@ -64,7 +25,7 @@
           class="btn btn-home"
           onclick="window.location.href = 'index.html'"
         >
-          Exit to Home
+          Exit
         </button>
       </div>
     </div>
@@ -86,7 +47,7 @@
     </div>
 
     <div class="admin-container">
-      <h2 style="margin-top: 20px">Create Flashcard</h2>
+      <h2 style="margin: 20px 0">Create Flashcard</h2>
       <form id="cardForm">
         <div class="form-section">
           <label>Category</label>
@@ -116,7 +77,7 @@
           <div id="editor-back" style="background: white; color: black"></div>
         </div>
 
-        <div class="btn-group" style="margin-bottom: 50px">
+        <div class="btn-group">
           <button type="submit" class="btn">SAVE CARD</button>
           <button
             type="button"
@@ -158,51 +119,31 @@
         }
       }
 
-      // Lógica de Validación y Guardado
       document
         .getElementById("cardForm")
         .addEventListener("submit", function (e) {
           e.preventDefault();
-
-          // Obtener valores
           const cat = document.getElementById("categorySelect").value;
           const tags = document.getElementById("tags").value;
           const frontHtml = qFront.root.innerHTML.trim();
           const backHtml = qBack.root.innerHTML.trim();
 
-          // Validación simple: ¿Están vacíos los editores?
-          // Quill por defecto pone "<p><br></p>" cuando está vacío
           const isFrontEmpty =
             qFront.getText().trim().length === 0 && !frontHtml.includes("<img");
           const isBackEmpty =
             qBack.getText().trim().length === 0 && !backHtml.includes("<img");
 
           if (!cat || !tags || isFrontEmpty || isBackEmpty) {
-            alert(
-              "Por favor, rellena todos los campos (Categoría, Tags, Front y Back)",
-            );
+            alert("Rellena todos los campos");
             return;
           }
 
-          // Si pasa la validación
-          const flashcardData = {
-            category: cat,
-            tags: tags,
-            front: frontHtml,
-            back: backHtml,
-            date: new Date().toISOString(),
-          };
-
-          console.log("Datos guardados con éxito:", flashcardData);
-
-          // Mostrar Modal
+          console.log("Guardado:", { cat, tags, frontHtml, backHtml });
           document.getElementById("modal-overlay").style.display = "flex";
         });
 
       function resetForNew() {
-        // Ocultar modal
         document.getElementById("modal-overlay").style.display = "none";
-        // Limpiar formulario
         document.getElementById("cardForm").reset();
         qFront.setContents([]);
         qBack.setContents([]);
