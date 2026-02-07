@@ -25,7 +25,7 @@ body {
 }
 
 header {
-  padding: 2rem 1rem;
+  padding: 2rem 0.7rem;
 }
 
 .nav-link {
@@ -55,6 +55,7 @@ select {
   border-radius: 6px;
   font-size: 1rem;
   width: 100%;
+  text-align: center;
 }
 
 .btn-group {
@@ -86,8 +87,8 @@ select {
 #app-container {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
-  padding: 20px;
+  gap: 1rem;
+  padding: 0.7rem;
   max-width: 500px;
   margin: 0 auto;
 }
@@ -112,8 +113,9 @@ select {
 /* Flashcards Altura Adaptable */
 .flashcard {
   perspective: 1000px;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   width: 100%;
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .flashcard-inner {
@@ -154,6 +156,7 @@ select {
   z-index: 1;
   text-align: left;
   position: absolute;
+  border-left: 0.7rem solid var(--accent);
 }
 
 .flashcard.flipped .front {
@@ -193,16 +196,18 @@ select {
   padding-bottom: 40px;
 }
 .form-section {
+  display: flex;
+  flex-direction: column;
   background: #1e3a2b;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
-  text-align: left;
-  border-left: 4px solid var(--accent);
+  /* text-align: left; */
 }
 label {
   color: var(--accent);
   font-weight: bold;
+  margin-bottom: 1rem;
 }
 
 #login-overlay,
@@ -234,4 +239,26 @@ label {
 .ql-editor {
   min-height: 150px;
   font-size: 16px;
+  resize: vertical;
+  overflow-y: auto;
+}
+
+/* Personalización Quill Toolbar */
+.ql-toolbar.ql-snow {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.ql-toolbar.ql-snow .ql-stroke {
+  stroke: var(--bg-dark);
+}
+
+.ql-toolbar.ql-snow .ql-fill {
+  fill: var(--bg-dark);
+}
+
+.ql-toolbar.ql-snow .ql-picker {
+  color: var(--bg-dark);
 }

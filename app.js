@@ -69,9 +69,21 @@ function renderCards(filter = null, isSearch = false) {
         </div>
     `;
 
-    // El evento de clic se mantiene igual
+    // Lógica de flip con animación de altura y cierre automático
     cardEl.onclick = function () {
-      this.classList.toggle("flipped");
+      const isFlipped = this.classList.contains("flipped");
+
+      // 1. Si abrimos una nueva (no estaba flipped), cerrar las otras
+      if (!isFlipped) {
+        document.querySelectorAll(".flashcard.flipped").forEach((other) => {
+          if (other !== this) {
+            animateHeight(other, () => other.classList.remove("flipped"));
+          }
+        });
+      }
+
+      // 2. Alternar la actual con animación
+      animateHeight(this, () => this.classList.toggle("flipped"));
     };
     container.appendChild(cardEl);
   });
@@ -87,5 +99,28 @@ document.getElementById("resetBtn").onclick = () => {
   document.getElementById("searchInput").value = "";
   renderCategories();
 };
+
+// Helper para animar suavemente la altura del contenedor
+function animateHeight(card, changeStateFn) {
+  const currentHeight = card.offsetHeight;
+  card.style.height = currentHeight + "px";
+
+  // Ejecutar el cambio de estado (clase flipped)
+  changeStateFn();
+
+  // Calcular nueva altura basada en el lado que será visible (relative)
+  const isFlipped = card.classList.contains("flipped");
+  const front = card.querySelector(".front");
+  const back = card.querySelector(".back");
+  const targetHeight = isFlipped ? back.offsetHeight : front.offsetHeight;
+
+  void card.offsetHeight; // Forzar reflow
+  card.style.height = targetHeight + "px";
+
+  // Limpiar estilo inline después de la transición (0.5s coincide con CSS)
+  setTimeout(() => {
+    card.style.height = "";
+  }, 500);
+}
 
 renderCategories();

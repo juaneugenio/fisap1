@@ -51,7 +51,7 @@
       <form id="cardForm">
         <div class="form-section">
           <label>Category</label>
-          <select id="categorySelect" style="margin-top: 8px">
+          <select id="categorySelect">
             <option value="">-- Select Category --</option>
             <option value="Projektmanagement">Projektmanagement</option>
             <option value="Datenschutz">Datenschutz</option>
@@ -61,12 +61,7 @@
         </div>
         <div class="form-section">
           <label>Tags</label>
-          <input
-            type="text"
-            id="tags"
-            placeholder="scrum, tech, security"
-            style="margin-top: 8px"
-          />
+          <input type="text" id="tags" placeholder="scrum, tech, security" />
         </div>
         <div class="form-section">
           <label>Frontside (Question/Title)</label>
@@ -101,7 +96,7 @@
             [{ color: [] }, { background: [] }],
             [{ list: "ordered" }, { list: "bullet" }],
             [{ align: [] }],
-            ["blockquote", "code-block", "code"],
+            ["blockquote", "code", "code-block"],
             ["link", "image"],
             ["clean"],
           ],
