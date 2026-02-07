@@ -1,0 +1,5 @@
+# Archivos de sistema y dependencias
+.DS_Store
+node_modules/
+.env
+Thumbs.db
