@@ -85,6 +85,7 @@
       </form>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
       const quillConfig = {
@@ -119,9 +120,15 @@
         .addEventListener("submit", function (e) {
           e.preventDefault();
           const cat = document.getElementById("categorySelect").value;
-          const tags = document.getElementById("tags").value;
-          const frontHtml = qFront.root.innerHTML.trim();
-          const backHtml = qBack.root.innerHTML.trim();
+          const tags = DOMPurify.sanitize(
+            document.getElementById("tags").value,
+          );
+          const frontHtml = DOMPurify.sanitize(qFront.root.innerHTML.trim(), {
+            ADD_ATTR: ["style"],
+          });
+          const backHtml = DOMPurify.sanitize(qBack.root.innerHTML.trim(), {
+            ADD_ATTR: ["style"],
+          });
 
           const isFrontEmpty =
             qFront.getText().trim().length === 0 && !frontHtml.includes("<img");

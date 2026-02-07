@@ -26,6 +26,16 @@ const data = {
         "El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.<br>El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.",
       tags: "roles",
     },
+    {
+      id: 3,
+      category: "IT-Sicherheit",
+      frontTitle: "Test de Seguridad XSS",
+      frontContent:
+        "Si ves una alerta, la seguridad falló. <img src=x onerror=alert('HACKED')>",
+      backContent:
+        "Este script no debe ejecutarse: <script>alert('HACKED')</script>",
+      tags: "test",
+    },
   ],
 };
 
@@ -63,16 +73,27 @@ function renderCards(filter = null, isSearch = false) {
     cardEl.setAttribute("tabindex", "0"); // Hacer accesible por teclado (Tab)
     cardEl.setAttribute("role", "button"); // Semántica para lectores de pantalla
     cardEl.setAttribute("aria-pressed", "false"); // Estado inicial (no girada)
+
+    // Sanitización de contenido HTML antes de renderizar (Seguridad XSS)
+    const safeCategory = DOMPurify.sanitize(card.category);
+    const safeTitle = DOMPurify.sanitize(card.frontTitle);
+    const safeFront = DOMPurify.sanitize(card.frontContent, {
+      ADD_ATTR: ["style"],
+    });
+    const safeBack = DOMPurify.sanitize(card.backContent, {
+      ADD_ATTR: ["style"],
+    });
+
     cardEl.innerHTML = `
         <div class="flashcard-inner">
             <div class="front">
-                <span class="card-label">Card ${index + 1} | ${card.category}</span>
-                <h3>${card.frontTitle}</h3>
-                <div class="front-content">${card.frontContent}</div>
+                <span class="card-label">Card ${index + 1} | ${safeCategory}</span>
+                <h3>${safeTitle}</h3>
+                <div class="front-content">${safeFront}</div>
             </div>
             <div class="back">
-                <span class="card-label">Card ${index + 1} | ${card.category}</span>
-                <div class="back-content">${card.backContent}</div>
+                <span class="card-label">Card ${index + 1} | ${safeCategory}</span>
+                <div class="back-content">${safeBack}</div>
             </div>
         </div>
     `;
