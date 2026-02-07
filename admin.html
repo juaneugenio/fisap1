@@ -64,7 +64,15 @@
           <input type="text" id="tags" placeholder="scrum, tech, security" />
         </div>
         <div class="form-section">
-          <label>Frontside (Question/Title)</label>
+          <label>Frontside Title (Question)</label>
+          <input
+            type="text"
+            id="frontTitle"
+            placeholder="Ej: ¿Qué es GDPR?"
+            style="margin-bottom: 15px"
+          />
+
+          <label>Frontside Content (Details/Image)</label>
           <div id="editor-front" style="background: white; color: black"></div>
         </div>
         <div class="form-section">
@@ -86,6 +94,8 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
       const quillConfig = {
@@ -120,6 +130,9 @@
         .addEventListener("submit", function (e) {
           e.preventDefault();
           const cat = document.getElementById("categorySelect").value;
+          const title = DOMPurify.sanitize(
+            document.getElementById("frontTitle").value,
+          );
           const tags = DOMPurify.sanitize(
             document.getElementById("tags").value,
           );
@@ -135,14 +148,31 @@
           const isBackEmpty =
             qBack.getText().trim().length === 0 && !backHtml.includes("<img");
 
-          if (!cat || !tags || isFrontEmpty || isBackEmpty) {
+          if (!cat || !title || !tags || isFrontEmpty || isBackEmpty) {
             alert("Rellena todos los campos");
             return;
           }
 
-          console.log("Guardado:", { cat, tags, frontHtml, backHtml });
-          document.getElementById("modal-overlay").style.display = "flex";
+          // Guardar en Supabase
+          saveCardToSupabase({
+            category: cat,
+            front_title: title,
+            tags: tags,
+            front_content: frontHtml,
+            back_content: backHtml,
+          });
         });
+
+      async function saveCardToSupabase(cardData) {
+        const { data, error } = await supabaseClient
+          .from("cards")
+          .insert([cardData]);
+        if (error) {
+          alert("Error al guardar: " + error.message);
+        } else {
+          document.getElementById("modal-overlay").style.display = "flex";
+        }
+      }
 
       function resetForNew() {
         document.getElementById("modal-overlay").style.display = "none";

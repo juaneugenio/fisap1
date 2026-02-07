@@ -1,42 +1,12 @@
-// Mock data actualizado para la prueba
-const data = {
+// Estructura de datos local
+let data = {
   categories: [
     "Projektmanagement",
     "Datenschutz",
     "IT-Sicherheit",
     "Qualitätsmanagement",
   ],
-  cards: [
-    {
-      id: 1,
-      category: "Datenschutz",
-      frontTitle: "¿Qué es GDPR?",
-      frontContent: "Regulación europea de datos.",
-      backContent:
-        "Es el Reglamento General de Protección de Datos que entró en vigor en 2018. lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.<br><br>Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur.",
-      tags: "ley, gdpr, europa",
-    },
-    {
-      id: 2,
-      category: "Datenschutz",
-      frontTitle: "Diferencia entre responsable y encargado",
-      frontContent:
-        "Roles en GDPR. lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.",
-      backContent:
-        "El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.<br>El responsable decide el 'por qué', el encargado procesa por cuenta del responsable y sus roles.",
-      tags: "roles, gdpr",
-    },
-    {
-      id: 3,
-      category: "Datenschutz",
-      frontTitle: "Implementación de GDPR en empresas",
-      frontContent:
-        "Roles y medidas prácticas. lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.",
-      backContent:
-        "El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.<br>El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.",
-      tags: "roles, management, praxis",
-    },
-  ],
+  cards: [],
 };
 
 // Inicializar Favoritos desde LocalStorage
@@ -44,6 +14,32 @@ let favorites = JSON.parse(localStorage.getItem("flashlearn_favs")) || [];
 
 const container = document.getElementById("app-container");
 let currentViewMode = "categories";
+
+// Cargar datos desde Supabase
+async function loadData() {
+  container.innerHTML =
+    '<p style="margin-top:2rem; color: var(--accent);">Lade Karten...</p>';
+
+  const { data: cards, error } = await supabaseClient
+    .from("cards")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    container.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+    return;
+  }
+
+  // Mapear datos de SQL (snake_case) a App (camelCase)
+  data.cards = cards.map((c) => ({
+    ...c,
+    frontTitle: c.front_title,
+    frontContent: c.front_content,
+    backContent: c.back_content,
+  }));
+
+  renderCategories();
+}
 
 function renderCategories() {
   currentViewMode = "categories";
@@ -283,5 +279,5 @@ function updateFavHeader() {
   }
 }
 
-renderCategories();
+loadData(); // Iniciar carga de datos
 updateFavHeader();
