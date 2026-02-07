@@ -214,6 +214,25 @@ select {
   font-weight: bold;
 }
 
+/* Estilos para Tags en la tarjeta */
+.card-tags {
+  margin-top: auto; /* Empuja los tags al fondo */
+  padding-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--accent);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
 /* Botón de Favoritos (Estrella) */
 .card-favorite-btn {
   position: absolute;

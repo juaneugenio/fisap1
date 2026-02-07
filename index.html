@@ -3,27 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FlAp1</title>
+    <title>FlAp1 Cards</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header>
-      <h1 onclick="location.reload()" style="cursor: pointer">FlashLearn</h1>
+      <h1 onclick="location.reload()" style="cursor: pointer">FlAp1 Cards</h1>
 
       <div class="nav-container">
         <a href="admin.html" class="nav-link">Dashboard</a>
         <a onclick="renderCards(null, 'favorites')" class="nav-link">
-          Favorites <span id="favCount"></span>
-          <span style="color: gold">★</span>
+          Favorites <span style="color: gold">★</span>
+          <span id="favCount"></span>
         </a>
       </div>
 
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Search term..." />
         <div class="btn-group">
-          <button class="btn" id="searchBtn">Search</button>
+          <button class="btn" id="searchBtn">Suchen</button>
           <button class="btn btn-home" id="resetBtn">Home</button>
         </div>
+        <p
+          id="searchStats"
+          style="
+            display: none;
+            margin-top: 10px;
+            color: var(--accent);
+            font-style: italic;
+          "
+        ></p>
       </div>
     </header>
 

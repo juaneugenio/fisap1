@@ -14,7 +14,7 @@ const data = {
       frontContent: "Regulación europea de datos.",
       backContent:
         "Es el Reglamento General de Protección de Datos que entró en vigor en 2018. lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.<br><br>Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur.",
-      tags: "ley",
+      tags: "ley, gdpr, europa",
     },
     {
       id: 2,
@@ -23,8 +23,18 @@ const data = {
       frontContent:
         "Roles en GDPR. lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.",
       backContent:
+        "El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.<br>El responsable decide el 'por qué', el encargado procesa por cuenta del responsable y sus roles.",
+      tags: "roles, gdpr",
+    },
+    {
+      id: 3,
+      category: "Datenschutz",
+      frontTitle: "Implementación de GDPR en empresas",
+      frontContent:
+        "Roles y medidas prácticas. lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.",
+      backContent:
         "El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.<br>El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.",
-      tags: "roles",
+      tags: "roles, management, praxis",
     },
   ],
 };
@@ -37,6 +47,10 @@ let currentViewMode = "categories";
 
 function renderCategories() {
   currentViewMode = "categories";
+  // Ocultar estadísticas de búsqueda al volver al home
+  const statsEl = document.getElementById("searchStats");
+  if (statsEl) statsEl.style.display = "none";
+
   container.innerHTML = "";
   data.categories.forEach((cat) => {
     const div = document.createElement("div");
@@ -56,13 +70,26 @@ function renderCards(filter = null, mode = "category") {
     filteredCards = data.cards.filter(
       (c) =>
         c.frontTitle.toLowerCase().includes(filter.toLowerCase()) ||
-        c.tags.toLowerCase().includes(filter.toLowerCase()),
+        (c.tags && c.tags.toLowerCase().includes(filter.toLowerCase())) ||
+        c.frontContent.toLowerCase().includes(filter.toLowerCase()) ||
+        c.backContent.toLowerCase().includes(filter.toLowerCase()),
     );
   } else if (mode === "favorites") {
     filteredCards = data.cards.filter((c) => favorites.includes(c.id));
   } else {
     // mode === 'category'
     filteredCards = data.cards.filter((c) => c.category === filter);
+  }
+
+  // Mostrar estadísticas solo si es una búsqueda
+  const statsEl = document.getElementById("searchStats");
+  if (statsEl) {
+    if (mode === "search") {
+      statsEl.style.display = "block";
+      statsEl.textContent = `${filteredCards.length} Karten für diese Suche`;
+    } else {
+      statsEl.style.display = "none";
+    }
   }
 
   if (filteredCards.length === 0) {
@@ -96,6 +123,19 @@ function renderCards(filter = null, mode = "category") {
       ADD_ATTR: ["style"],
     });
 
+    // Procesar tags para visualización (separar por comas)
+    const tagsList = card.tags
+      ? card.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t)
+      : [];
+
+    const tagsHtml =
+      tagsList.length > 0
+        ? `<div class="card-tags">${tagsList.map((tag) => `<span class="tag">#${DOMPurify.sanitize(tag)}</span>`).join("")}</div>`
+        : "";
+
     cardEl.innerHTML = `
         <div class="flashcard-inner">
             <div class="front">
@@ -108,6 +148,7 @@ function renderCards(filter = null, mode = "category") {
                 <button class="card-favorite-btn ${favClass}" onclick="toggleFavorite(event, ${card.id})">${favIcon}</button>
                 <span class="card-label">Card ${index + 1} | ${safeCategory}</span>
                 <div class="back-content">${safeBack}</div>
+                ${tagsHtml}
             </div>
         </div>
     `;
@@ -191,8 +232,12 @@ window.toggleFavorite = function (e, id) {
 
 // Botones de búsqueda
 document.getElementById("searchBtn").onclick = () => {
-  const term = document.getElementById("searchInput").value;
-  if (term) renderCards(term, "search");
+  // Buenas prácticas: trim() elimina espacios al inicio y final
+  const term = document.getElementById("searchInput").value.trim();
+  // Si después de limpiar está vacío, no hacemos nada (evita búsquedas vacías)
+  if (term) {
+    renderCards(term, "search");
+  }
 };
 
 // Permitir búsqueda presionando la tecla Enter
