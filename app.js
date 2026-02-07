@@ -26,22 +26,17 @@ const data = {
         "El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.<br>El responsable decide el 'por qué', el encargado procesa por cuenta del responsable.",
       tags: "roles",
     },
-    {
-      id: 3,
-      category: "IT-Sicherheit",
-      frontTitle: "Test de Seguridad XSS",
-      frontContent:
-        "Si ves una alerta, la seguridad falló. <img src=x onerror=alert('HACKED')>",
-      backContent:
-        "Este script no debe ejecutarse: <script>alert('HACKED')</script>",
-      tags: "test",
-    },
   ],
 };
 
+// Inicializar Favoritos desde LocalStorage
+let favorites = JSON.parse(localStorage.getItem("flashlearn_favs")) || [];
+
 const container = document.getElementById("app-container");
+let currentViewMode = "categories";
 
 function renderCategories() {
+  currentViewMode = "categories";
   container.innerHTML = "";
   data.categories.forEach((cat) => {
     const div = document.createElement("div");
@@ -52,18 +47,30 @@ function renderCategories() {
   });
 }
 
-function renderCards(filter = null, isSearch = false) {
+function renderCards(filter = null, mode = "category") {
+  currentViewMode = mode;
   container.innerHTML = "";
-  let filteredCards = isSearch
-    ? data.cards.filter(
-        (c) =>
-          c.frontTitle.toLowerCase().includes(filter.toLowerCase()) ||
-          c.tags.toLowerCase().includes(filter.toLowerCase()),
-      )
-    : data.cards.filter((c) => c.category === filter);
+  let filteredCards = [];
+
+  if (mode === "search") {
+    filteredCards = data.cards.filter(
+      (c) =>
+        c.frontTitle.toLowerCase().includes(filter.toLowerCase()) ||
+        c.tags.toLowerCase().includes(filter.toLowerCase()),
+    );
+  } else if (mode === "favorites") {
+    filteredCards = data.cards.filter((c) => favorites.includes(c.id));
+  } else {
+    // mode === 'category'
+    filteredCards = data.cards.filter((c) => c.category === filter);
+  }
 
   if (filteredCards.length === 0) {
-    container.innerHTML = `<p style="color: var(--text); margin-top: 2rem; font-style: italic;">Es gibt noch keine Karten für diese Suche.</p>`;
+    const msg =
+      mode === "favorites"
+        ? "Leere Favoritenliste. Markieren Sie die Karten mit einem Stern, um sie dieser Liste hinzuzufügen."
+        : "Es wurden keine Karten gefunden.";
+    container.innerHTML = `<p style="color: var(--text); margin-top: 2rem; font-style: italic;">${msg}</p>`;
     return;
   }
 
@@ -73,6 +80,11 @@ function renderCards(filter = null, isSearch = false) {
     cardEl.setAttribute("tabindex", "0"); // Hacer accesible por teclado (Tab)
     cardEl.setAttribute("role", "button"); // Semántica para lectores de pantalla
     cardEl.setAttribute("aria-pressed", "false"); // Estado inicial (no girada)
+
+    // Estado de favorito
+    const isFav = favorites.includes(card.id);
+    const favIcon = isFav ? "★" : "☆";
+    const favClass = isFav ? "active" : "";
 
     // Sanitización de contenido HTML antes de renderizar (Seguridad XSS)
     const safeCategory = DOMPurify.sanitize(card.category);
@@ -87,11 +99,13 @@ function renderCards(filter = null, isSearch = false) {
     cardEl.innerHTML = `
         <div class="flashcard-inner">
             <div class="front">
+                <button class="card-favorite-btn ${favClass}" onclick="toggleFavorite(event, ${card.id})">${favIcon}</button>
                 <span class="card-label">Card ${index + 1} | ${safeCategory}</span>
                 <h3>${safeTitle}</h3>
                 <div class="front-content">${safeFront}</div>
             </div>
             <div class="back">
+                <button class="card-favorite-btn ${favClass}" onclick="toggleFavorite(event, ${card.id})">${favIcon}</button>
                 <span class="card-label">Card ${index + 1} | ${safeCategory}</span>
                 <div class="back-content">${safeBack}</div>
             </div>
@@ -130,12 +144,55 @@ function renderCards(filter = null, isSearch = false) {
     });
     container.appendChild(cardEl);
   });
+  updateFavHeader();
 }
+
+// Función global para manejar favoritos
+window.toggleFavorite = function (e, id) {
+  e.stopPropagation(); // Evitar que la tarjeta gire
+
+  const index = favorites.indexOf(id);
+  const isRemoving = index !== -1;
+
+  if (index === -1) {
+    favorites.push(id);
+  } else {
+    favorites.splice(index, 1);
+  }
+
+  // Guardar en LocalStorage
+  localStorage.setItem("flashlearn_favs", JSON.stringify(favorites));
+  updateFavHeader();
+
+  // Si estamos en vista favoritos y quitamos uno, eliminar del DOM inmediatamente
+  if (currentViewMode === "favorites" && isRemoving) {
+    const cardEl = e.target.closest(".flashcard");
+    if (cardEl) cardEl.remove();
+    if (favorites.length === 0) {
+      container.innerHTML = `<p style="color: var(--text); margin-top: 2rem; font-style: italic;">Leere Favoritenliste. Markieren Sie die Karten mit einem Stern, um sie dieser Liste hinzuzufügen.</p>`;
+    }
+    return;
+  }
+
+  // Actualizar UI de todos los botones de esta tarjeta (front y back)
+  const cardInner = e.target.closest(".flashcard-inner");
+  const buttons = cardInner.querySelectorAll(".card-favorite-btn");
+  const isFav = favorites.includes(id);
+
+  buttons.forEach((btn) => {
+    btn.innerHTML = isFav ? "★" : "☆";
+    btn.classList.toggle("active", isFav);
+    // Reiniciar animación
+    btn.classList.remove("pop");
+    void btn.offsetWidth; // Trigger reflow
+    btn.classList.add("pop");
+  });
+};
 
 // Botones de búsqueda
 document.getElementById("searchBtn").onclick = () => {
   const term = document.getElementById("searchInput").value;
-  if (term) renderCards(term, true);
+  if (term) renderCards(term, "search");
 };
 
 // Permitir búsqueda presionando la tecla Enter
@@ -173,4 +230,13 @@ function animateHeight(card, changeStateFn) {
   }, 500);
 }
 
+function updateFavHeader() {
+  const count = favorites.length;
+  const countEl = document.getElementById("favCount");
+  if (countEl) {
+    countEl.textContent = count > 0 ? `(${count})` : "";
+  }
+}
+
 renderCategories();
+updateFavHeader();

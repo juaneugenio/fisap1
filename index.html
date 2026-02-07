@@ -9,7 +9,14 @@
   <body>
     <header>
       <h1 onclick="location.reload()" style="cursor: pointer">FlashLearn</h1>
-      <a href="admin.html" class="nav-link">Dashboard</a>
+
+      <div class="nav-container">
+        <a href="admin.html" class="nav-link">Dashboard</a>
+        <a onclick="renderCards(null, 'favorites')" class="nav-link">
+          Favorites <span id="favCount"></span>
+          <span style="color: gold">★</span>
+        </a>
+      </div>
 
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Search term..." />
