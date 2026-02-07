@@ -1,10 +1,9 @@
 :root {
-  --bg-dark: #14281d;
-  --card-bg: #1e3a2b;
+  --bg-dark: #070115;
+  --card-bg: #181125;
   --accent: #71b340;
-  --brown: #8e6e53;
-  --purple: #5b1865;
-  --text: #f1f5f9;
+  --border-color: #2a2a2b;
+  --text: #c9e4ca;
   --font-size-base: clamp(16.5px, 2vw + 10px, 20px);
 }
 
@@ -26,6 +25,7 @@ body {
 
 header {
   padding: 2rem 0.7rem;
+  color: var(--accent);
 }
 
 /* Contenedor de navegación */
@@ -64,9 +64,9 @@ header {
 
 input,
 select {
-  background: #0a140f;
-  border: 1px solid var(--brown);
-  color: white;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text);
   padding: 12px;
   border-radius: 6px;
   font-size: 1rem;
@@ -98,13 +98,13 @@ select {
 
 .btn:hover {
   transform: translateY(-3px);
-  filter: brightness(1.1);
+  filter: brightness(1.2);
 }
 
 .btn-home,
 .btn-cancel {
-  background: var(--brown);
-  color: white;
+  background: var(--border-color);
+  color: var(--text);
 }
 
 /* Grid Sistema: 1 col móvil, 2 col resto */
@@ -119,10 +119,10 @@ select {
 
 /* Categorías */
 .category-item {
-  background: var(--purple);
+  background: var(--card-bg);
   padding: 1rem;
   border-radius: 12px;
-  border: 2px solid var(--brown);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: transform 0.2s;
   display: flex;
@@ -131,7 +131,8 @@ select {
 }
 .category-item:hover {
   transform: translateY(-5px);
-  background: #6d1d7a;
+  /* background: var(--border-color); */
+  filter: brightness(1.3);
 }
 
 /* Flashcards Altura Adaptable */
@@ -146,12 +147,13 @@ select {
 
 .flashcard:hover {
   transform: translateY(-5px);
+  filter: brightness(1.2);
 }
 
 /* Accesibilidad: Foco visible para navegación por teclado */
 .flashcard:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
   border-radius: 12px;
 }
 
@@ -173,13 +175,14 @@ select {
   backface-visibility: hidden;
   padding: 50px 20px 30px 20px;
   border-radius: 12px;
-  border: 2px solid var(--brown);
+  border: 1px solid var(--border-color);
   background: var(--card-bg);
   display: flex;
   flex-direction: column;
   width: 100%;
   top: 0;
   left: 0;
+  font-weight: 200;
 }
 
 .front {
@@ -193,7 +196,7 @@ select {
   z-index: 1;
   text-align: left;
   position: absolute;
-  border-left: 0.7rem solid var(--accent);
+  border-left: 0.4rem solid var(--accent);
 }
 
 .flashcard.flipped .front {
@@ -224,12 +227,12 @@ select {
 }
 
 .tag {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--bg-dark);
   color: var(--accent);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 200;
   letter-spacing: 0.5px;
 }
 
@@ -242,7 +245,7 @@ select {
   border: none;
   font-size: 1.8rem;
   cursor: pointer;
-  color: var(--brown); /* Color para estado vacío (☆) */
+  color: var(--border-color); /* Color para estado vacío (☆) */
   z-index: 10;
   padding: 0;
   line-height: 1;
@@ -252,7 +255,8 @@ select {
 }
 
 .card-favorite-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.2);
+  filter: brightness(1.5);
 }
 
 .card-favorite-btn.active {
@@ -279,6 +283,7 @@ select {
   margin: 10px 0;
   color: var(--accent);
   text-align: center;
+  font-weight: 600;
 }
 .front-content,
 .back-content {
@@ -293,15 +298,21 @@ select {
   margin: 0 auto;
   padding-bottom: 40px;
 }
+.admin-container h2 {
+  color: var(--accent);
+  margin-top: 2rem;
+  margin-bottom: 2.5rem;
+}
 .form-section {
   display: flex;
   flex-direction: column;
-  background: #1e3a2b;
+  background: var(--border-color);
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
   /* text-align: left; */
 }
+
 label {
   color: var(--accent);
   font-weight: bold;
@@ -312,14 +323,17 @@ label {
 #modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 1);
   z-index: 2000;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-
+#login-overlay h2 {
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
 #modal-overlay {
   display: none;
   background: rgba(0, 0, 0, 0.8);
@@ -327,7 +341,7 @@ label {
 
 .modal {
   background: var(--card-bg);
-  border: 2px solid var(--accent);
+  border: 1px solid var(--accent);
   padding: 30px;
   border-radius: 12px;
   max-width: 400px;

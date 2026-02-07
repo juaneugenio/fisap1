@@ -82,7 +82,7 @@ function renderCards(filter = null, mode = "category") {
   if (statsEl) {
     if (mode === "search") {
       statsEl.style.display = "block";
-      statsEl.textContent = `${filteredCards.length} Karten für diese Suche`;
+      statsEl.textContent = `Suchergebnisse: ${filteredCards.length}`;
     } else {
       statsEl.style.display = "none";
     }
