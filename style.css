@@ -132,6 +132,13 @@ select {
   transform: translateY(-5px);
 }
 
+/* Accesibilidad: Foco visible para navegación por teclado */
+.flashcard:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
 .flashcard-inner {
   position: relative;
   width: 100%;

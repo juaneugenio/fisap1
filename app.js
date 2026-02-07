@@ -52,9 +52,17 @@ function renderCards(filter = null, isSearch = false) {
       )
     : data.cards.filter((c) => c.category === filter);
 
+  if (filteredCards.length === 0) {
+    container.innerHTML = `<p style="color: var(--text); margin-top: 2rem; font-style: italic;">Es gibt noch keine Karten für diese Suche.</p>`;
+    return;
+  }
+
   filteredCards.forEach((card, index) => {
     const cardEl = document.createElement("div");
     cardEl.className = "flashcard"; // Contenedor principal
+    cardEl.setAttribute("tabindex", "0"); // Hacer accesible por teclado (Tab)
+    cardEl.setAttribute("role", "button"); // Semántica para lectores de pantalla
+    cardEl.setAttribute("aria-pressed", "false"); // Estado inicial (no girada)
     cardEl.innerHTML = `
         <div class="flashcard-inner">
             <div class="front">
@@ -77,14 +85,28 @@ function renderCards(filter = null, isSearch = false) {
       if (!isFlipped) {
         document.querySelectorAll(".flashcard.flipped").forEach((other) => {
           if (other !== this) {
-            animateHeight(other, () => other.classList.remove("flipped"));
+            animateHeight(other, () => {
+              other.classList.remove("flipped");
+              other.setAttribute("aria-pressed", "false");
+            });
           }
         });
       }
 
       // 2. Alternar la actual con animación
-      animateHeight(this, () => this.classList.toggle("flipped"));
+      animateHeight(this, () => {
+        this.classList.toggle("flipped");
+        this.setAttribute("aria-pressed", this.classList.contains("flipped"));
+      });
     };
+
+    // Accesibilidad: Permitir girar con Enter o Espacio
+    cardEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault(); // Evitar scroll con espacio
+        cardEl.click();
+      }
+    });
     container.appendChild(cardEl);
   });
 }
@@ -94,6 +116,13 @@ document.getElementById("searchBtn").onclick = () => {
   const term = document.getElementById("searchInput").value;
   if (term) renderCards(term, true);
 };
+
+// Permitir búsqueda presionando la tecla Enter
+document.getElementById("searchInput").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    document.getElementById("searchBtn").click();
+  }
+});
 
 document.getElementById("resetBtn").onclick = () => {
   document.getElementById("searchInput").value = "";
