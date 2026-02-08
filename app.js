@@ -1,11 +1,6 @@
 // Estructura de datos local
 let data = {
-  categories: [
-    "Projektmanagement",
-    "Datenschutz",
-    "IT-Sicherheit",
-    "Qualitätsmanagement",
-  ],
+  categories: [],
   cards: [],
 };
 
@@ -20,6 +15,17 @@ async function loadData() {
   container.innerHTML =
     '<p style="margin-top:2rem; color: var(--accent);">Lade Karten...</p>';
 
+  // 1. Cargar Categorías
+  const { data: cats, error: catError } = await supabaseClient
+    .from("categories")
+    .select("name")
+    .order("name");
+
+  if (!catError && cats) {
+    data.categories = cats.map((c) => c.name);
+  }
+
+  // 2. Cargar Tarjetas
   const { data: cards, error } = await supabaseClient
     .from("cards")
     .select("*")
@@ -63,13 +69,27 @@ function renderCards(filter = null, mode = "category") {
   let filteredCards = [];
 
   if (mode === "search") {
-    filteredCards = data.cards.filter(
-      (c) =>
-        c.frontTitle.toLowerCase().includes(filter.toLowerCase()) ||
-        (c.tags && c.tags.toLowerCase().includes(filter.toLowerCase())) ||
-        c.frontContent.toLowerCase().includes(filter.toLowerCase()) ||
-        c.backContent.toLowerCase().includes(filter.toLowerCase()),
-    );
+    const lowerFilter = filter.toLowerCase();
+
+    // Si es un número, buscar SOLO por ID
+    if (!isNaN(lowerFilter)) {
+      filteredCards = data.cards.filter((c) => String(c.id) === lowerFilter);
+    } else {
+      // Si es texto, buscar en Título, Tags y Contenido
+      filteredCards = data.cards.filter((c) => {
+        if (c.frontTitle.toLowerCase().includes(lowerFilter)) return true;
+        if (c.tags && c.tags.toLowerCase().includes(lowerFilter)) return true;
+
+        const cleanFront = c.frontContent
+          .replace(/<[^>]+>/g, " ")
+          .toLowerCase();
+        const cleanBack = c.backContent.replace(/<[^>]+>/g, " ").toLowerCase();
+
+        return (
+          cleanFront.includes(lowerFilter) || cleanBack.includes(lowerFilter)
+        );
+      });
+    }
   } else if (mode === "favorites") {
     filteredCards = data.cards.filter((c) => favorites.includes(c.id));
   } else {

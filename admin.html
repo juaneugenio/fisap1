@@ -46,24 +46,87 @@
       </div>
     </div>
 
+    <!-- Modal de Confirmación de Borrado (Alemán) -->
+    <div
+      id="delete-modal-overlay"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div class="modal">
+        <h3 style="color: #ff6b6b">Karte löschen?</h3>
+        <p>
+          Möchten Sie diese Karte wirklich löschen? Diese Aktion kann nicht
+          rückgängig gemacht werden.
+        </p>
+        <div class="btn-group">
+          <button
+            class="btn"
+            style="background: #ff6b6b; color: white"
+            onclick="confirmDelete()"
+          >
+            Löschen
+          </button>
+          <button class="btn btn-home" onclick="closeDeleteModal()">
+            Abbrechen
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Éxito -->
     <div id="modal-overlay">
       <div class="modal">
         <h3>Karte geschpeichert!</h3>
         <p>Eine weitere Karte erstellen?</p>
         <div class="btn-group">
           <button class="btn" onclick="resetForNew()">Ja</button>
+          <button class="btn btn-home" onclick="showView('cards-view')">
+            Nein (Zurück)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmación de Borrado de Categoría -->
+    <div
+      id="delete-cat-modal-overlay"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div class="modal">
+        <h3 style="color: #ff6b6b">Kategorie löschen?</h3>
+        <p id="delete-cat-msg"></p>
+        <div class="btn-group">
           <button
-            class="btn btn-home"
-            onclick="window.location.href = 'index.html'"
+            class="btn"
+            style="background: #ff6b6b; color: white"
+            onclick="confirmDeleteCategory()"
           >
-            Nein (Home)
+            Löschen
+          </button>
+          <button class="btn btn-home" onclick="closeDeleteCatModal()">
+            Abbrechen
           </button>
         </div>
       </div>
     </div>
 
     <div class="admin-container">
-      <h2>Create Flashcard</h2>
+      <!-- Header Admin -->
       <div
         style="
           display: flex;
@@ -71,59 +134,142 @@
           align-items: center;
           margin-top: 2rem;
           margin-bottom: 2.5rem;
+          border-bottom: 1px solid var(--border-color);
+          padding-bottom: 1rem;
         "
       >
+        <h2
+          style="margin: 0; cursor: pointer"
+          onclick="showView('dashboard-view')"
+        >
+          Admin Panel
+        </h2>
         <button
           class="btn btn-home"
           onclick="logout()"
           style="padding: 8px 15px; font-size: 0.8rem; flex: 0 0 auto"
         >
-          Logout
+          Logout ➜
         </button>
       </div>
-      <form id="cardForm">
-        <div class="form-section">
-          <label>Category</label>
-          <select id="categorySelect">
-            <option value="">☞ Select Category</option>
-            <option value="Projektmanagement">Projektmanagement</option>
-            <option value="Datenschutz">Datenschutz</option>
-            <option value="IT-Sicherheit">IT-Sicherheit</option>
-            <option value="Qualitätsmanagement">Qualitätsmanagement</option>
-          </select>
+
+      <!-- VISTA 1: DASHBOARD -->
+      <div id="dashboard-view">
+        <div class="dashboard-menu">
+          <div class="dashboard-card" onclick="showView('categories-view')">
+            <span style="font-size: 2rem">📂</span>
+            <h3>Admin Categories</h3>
+          </div>
+          <div class="dashboard-card" onclick="showView('cards-view')">
+            <span style="font-size: 2rem">🗂️</span>
+            <h3>Admin Cards</h3>
+          </div>
         </div>
-        <div class="form-section">
-          <label>Tags</label>
-          <input type="text" id="tags" placeholder="scrum, tech, security" />
+      </div>
+
+      <!-- VISTA 2: CATEGORIAS -->
+      <div id="categories-view" class="hidden">
+        <h3>Manage Categories</h3>
+        <div class="search-box" style="margin-bottom: 20px">
+          <input type="text" id="newCatInput" placeholder="New Category Name" />
+          <div class="btn-group">
+            <button class="btn btn-home" onclick="showView('dashboard-view')">
+              Back to Dashboard
+            </button>
+            <button class="btn" onclick="addCategory()">Add</button>
+          </div>
         </div>
-        <div class="form-section">
-          <label>Frontside Title (Question)</label>
+        <div id="categories-list" class="admin-list">
+          <!-- Lista dinámica -->
+        </div>
+      </div>
+
+      <!-- VISTA 3: TARJETAS (LISTA) -->
+      <div id="cards-view" class="hidden">
+        <div style="display: flex; gap: 10px; margin-bottom: 20px">
           <input
             type="text"
-            id="frontTitle"
-            placeholder="Ej: ¿Qué es GDPR?"
-            style="margin-bottom: 15px"
+            id="adminSearchInput"
+            placeholder="Search by ID or Text..."
           />
-
-          <label>Frontside Content (Details/Image)</label>
-          <div id="editor-front" style="background: white; color: black"></div>
-        </div>
-        <div class="form-section">
-          <label>Backside (Answer/Details)</label>
-          <div id="editor-back" style="background: white; color: black"></div>
-        </div>
-
-        <div class="btn-group">
-          <button type="submit" class="btn">SAVE CARD</button>
+          <button class="btn" onclick="searchAdminCards()">Search</button>
           <button
-            type="button"
-            class="btn btn-cancel"
-            onclick="window.location.href = 'index.html'"
+            class="btn"
+            onclick="prepareCreateCard()"
+            style="background: var(--accent); color: var(--bg-dark)"
           >
-            CANCEL
+            + New Card
           </button>
         </div>
-      </form>
+        <div id="cards-list" class="admin-list">
+          <!-- Lista dinámica -->
+        </div>
+        <button
+          class="btn btn-home"
+          onclick="showView('dashboard-view')"
+          style="margin-top: 20px"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+
+      <!-- VISTA 4: FORMULARIO TARJETA (CREAR/EDITAR) -->
+      <div id="card-form-view" class="hidden">
+        <h3 id="formTitle">Create Flashcard</h3>
+        <form id="cardForm">
+          <input type="hidden" id="editCardId" />
+          <!-- ID oculto para edición -->
+          <div class="form-section">
+            <label>Category</label>
+            <select id="categorySelect">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+          <div class="form-section">
+            <label>Tags</label>
+            <input type="text" id="tags" placeholder="scrum, tech, security" />
+          </div>
+          <div class="form-section">
+            <label>Frontside Title (Question)</label>
+            <input
+              type="text"
+              id="frontTitle"
+              placeholder="Ej: ¿Qué es GDPR?"
+              style="margin-bottom: 15px"
+            />
+
+            <label>Frontside Content (Details/Image)</label>
+            <div
+              id="editor-front"
+              style="background: white; color: black"
+            ></div>
+          </div>
+          <div class="form-section">
+            <label>Backside (Answer/Details)</label>
+            <div id="editor-back" style="background: white; color: black"></div>
+          </div>
+
+          <div class="btn-group">
+            <button type="submit" class="btn" id="saveBtn">SAVE CARD</button>
+            <button
+              type="button"
+              class="btn"
+              id="deleteBtn"
+              style="background: #ff6b6b; color: white; display: none"
+              onclick="askDeleteCard()"
+            >
+              DELETE CARD
+            </button>
+            <button
+              type="button"
+              class="btn btn-cancel"
+              onclick="showView('cards-view')"
+            >
+              CANCEL
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
@@ -150,6 +296,12 @@
       const qFront = new Quill("#editor-front", quillConfig);
       const qBack = new Quill("#editor-back", quillConfig);
 
+      // Variables globales
+      let allCategories = [];
+      let cardToDeleteId = null;
+      let catToDeleteId = null;
+      let catToDeleteName = null;
+
       // Verificar sesión al cargar
       async function checkSession() {
         const {
@@ -157,6 +309,8 @@
         } = await supabaseClient.auth.getSession();
         if (session) {
           document.getElementById("login-overlay").style.display = "none";
+          loadCategories(); // Cargar categorías al iniciar
+          showView("dashboard-view");
         }
       }
       checkSession();
@@ -177,6 +331,214 @@
         } else {
           errorEl.style.display = "none";
           document.getElementById("login-overlay").style.display = "none";
+          loadCategories();
+          showView("dashboard-view");
+        }
+      }
+
+      // --- GESTIÓN DE VISTAS ---
+      function showView(viewId) {
+        // Ocultar todas
+        [
+          "dashboard-view",
+          "categories-view",
+          "cards-view",
+          "card-form-view",
+        ].forEach((id) => {
+          document.getElementById(id).classList.add("hidden");
+        });
+        // Mostrar seleccionada
+        document.getElementById(viewId).classList.remove("hidden");
+
+        if (viewId === "categories-view") renderCategoriesList();
+        if (viewId === "cards-view") searchAdminCards(); // Cargar todas al entrar
+      }
+
+      // --- GESTIÓN DE CATEGORÍAS ---
+      async function loadCategories() {
+        const { data, error } = await supabaseClient
+          .from("categories")
+          .select("*")
+          .order("name");
+        if (data) {
+          allCategories = data;
+          updateCategorySelect();
+        }
+      }
+
+      function updateCategorySelect() {
+        const select = document.getElementById("categorySelect");
+        select.innerHTML = '<option value="">☞ Select Category</option>';
+        allCategories.forEach((cat) => {
+          const option = document.createElement("option");
+          option.value = cat.name;
+          option.textContent = cat.name;
+          select.appendChild(option);
+        });
+      }
+
+      function renderCategoriesList() {
+        const list = document.getElementById("categories-list");
+        list.innerHTML = "";
+        allCategories.forEach((cat) => {
+          const item = document.createElement("div");
+          item.className = "admin-list-item";
+          item.innerHTML = `
+            <div style="font-weight: bold;">${DOMPurify.sanitize(cat.name)}</div>
+            <div style="display: flex; gap: 5px; justify-content: flex-end; flex: 0 0 auto;">
+              <button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="editCategory(${cat.id})">Edit</button>
+              <button class="btn" style="background: #ff6b6b; color: white; padding: 5px 10px; font-size: 0.8rem;" onclick="askDeleteCategory(${cat.id})">Delete</button>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      async function addCategory() {
+        const name = document.getElementById("newCatInput").value.trim();
+        if (!name) return;
+        const { error } = await supabaseClient
+          .from("categories")
+          .insert([{ name }]);
+        if (!error) {
+          document.getElementById("newCatInput").value = "";
+          await loadCategories();
+          renderCategoriesList();
+        } else {
+          alert("Error: " + error.message);
+        }
+      }
+
+      async function editCategory(id) {
+        const cat = allCategories.find((c) => c.id === id);
+        if (!cat) return;
+
+        const newName = prompt("Neuer Name für Kategorie:", cat.name);
+        if (newName && newName.trim() !== "" && newName !== cat.name) {
+          const trimmedName = newName.trim();
+
+          // 1. Actualizar nombre en tabla categories
+          const { error: catError } = await supabaseClient
+            .from("categories")
+            .update({ name: trimmedName })
+            .eq("id", id);
+
+          if (catError) {
+            alert("Error updating category: " + catError.message);
+            return;
+          }
+
+          // 2. Actualizar todas las tarjetas asociadas (Cascada manual)
+          const { error: cardsError } = await supabaseClient
+            .from("cards")
+            .update({ category: trimmedName })
+            .eq("category", cat.name);
+
+          if (cardsError) {
+            alert(
+              "Warning: Category updated but cards update failed: " +
+                cardsError.message,
+            );
+          }
+
+          await loadCategories();
+          renderCategoriesList();
+        }
+      }
+
+      async function askDeleteCategory(id) {
+        const cat = allCategories.find((c) => c.id === id);
+        if (!cat) return;
+
+        catToDeleteId = id;
+        catToDeleteName = cat.name;
+
+        // Contar tarjetas afectadas
+        const { count, error } = await supabaseClient
+          .from("cards")
+          .select("*", { count: "exact", head: true })
+          .eq("category", cat.name);
+
+        if (error) {
+          alert("Error counting cards: " + error.message);
+          return;
+        }
+
+        const msg = `Möchten Sie die Kategorie "${cat.name}" wirklich löschen? ${count} zugehörige Karten werden ebenfalls gelöscht.`;
+        document.getElementById("delete-cat-msg").textContent = msg;
+        document.getElementById("delete-cat-modal-overlay").style.display =
+          "flex";
+      }
+
+      async function confirmDeleteCategory() {
+        if (!catToDeleteId || !catToDeleteName) return;
+
+        // 1. Borrar tarjetas asociadas
+        await supabaseClient
+          .from("cards")
+          .delete()
+          .eq("category", catToDeleteName);
+
+        // 2. Borrar categoría
+        const { error } = await supabaseClient
+          .from("categories")
+          .delete()
+          .eq("id", catToDeleteId);
+
+        if (error) {
+          alert("Error deleting category: " + error.message);
+        } else {
+          closeDeleteCatModal();
+          await loadCategories();
+          renderCategoriesList();
+        }
+      }
+
+      function closeDeleteCatModal() {
+        document.getElementById("delete-cat-modal-overlay").style.display =
+          "none";
+        catToDeleteId = null;
+        catToDeleteName = null;
+      }
+
+      // --- GESTIÓN DE TARJETAS ---
+      async function searchAdminCards() {
+        const term = document.getElementById("adminSearchInput").value.trim();
+        const list = document.getElementById("cards-list");
+        list.innerHTML = "<p>Loading...</p>";
+
+        let query = supabaseClient
+          .from("cards")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (term) {
+          if (!isNaN(term)) {
+            // Es un número, buscar por ID
+            query = query.eq("id", term);
+          } else {
+            // Es texto, buscar por título
+            query = query.ilike("front_title", `%${term}%`);
+          }
+        }
+
+        const { data, error } = await query;
+
+        list.innerHTML = "";
+        if (data && data.length > 0) {
+          data.forEach((card) => {
+            const item = document.createElement("div");
+            item.className = "admin-list-item";
+            item.innerHTML = `
+              <div style="flex: 0 0 50px; font-weight: bold;">#${card.id}</div>
+              <div style="flex: 2;">${card.front_title}</div>
+              <div style="flex: 1; color: var(--accent);">${card.category}</div>
+              <button class="btn" style="flex: 0 0 60px; padding: 5px;" onclick="editCard(${card.id})">✏️</button>
+            `;
+            list.appendChild(item);
+          });
+        } else {
+          list.innerHTML = "<p>No cards found.</p>";
         }
       }
 
@@ -184,6 +546,7 @@
         .getElementById("cardForm")
         .addEventListener("submit", function (e) {
           e.preventDefault();
+          const id = document.getElementById("editCardId").value;
           const cat = document.getElementById("categorySelect").value;
           const title = DOMPurify.sanitize(
             document.getElementById("frontTitle").value,
@@ -209,19 +572,88 @@
           }
 
           // Guardar en Supabase
-          saveCardToSupabase({
+          const cardData = {
             category: cat,
             front_title: title,
             tags: tags,
             front_content: frontHtml,
             back_content: backHtml,
-          });
+          };
+
+          saveCardToSupabase(cardData, id);
         });
 
-      async function saveCardToSupabase(cardData) {
+      function prepareCreateCard() {
+        resetForNew();
+        document.getElementById("formTitle").textContent = "Create Flashcard";
+        document.getElementById("saveBtn").textContent = "SAVE CARD";
+        document.getElementById("deleteBtn").style.display = "none";
+        document.getElementById("editCardId").value = "";
+        showView("card-form-view");
+      }
+
+      async function editCard(id) {
         const { data, error } = await supabaseClient
           .from("cards")
-          .insert([cardData]);
+          .select("*")
+          .eq("id", id)
+          .single();
+        if (data) {
+          document.getElementById("formTitle").textContent = `Edit Card #${id}`;
+          document.getElementById("saveBtn").textContent = "UPDATE CARD";
+          document.getElementById("deleteBtn").style.display = "inline-block";
+          document.getElementById("editCardId").value = id;
+
+          document.getElementById("categorySelect").value = data.category;
+          document.getElementById("tags").value = data.tags || "";
+          document.getElementById("frontTitle").value = data.front_title;
+          qFront.clipboard.dangerouslyPasteHTML(data.front_content);
+          qBack.clipboard.dangerouslyPasteHTML(data.back_content);
+
+          showView("card-form-view");
+        }
+      }
+
+      function askDeleteCard() {
+        cardToDeleteId = document.getElementById("editCardId").value;
+        document.getElementById("delete-modal-overlay").style.display = "flex";
+      }
+
+      function closeDeleteModal() {
+        document.getElementById("delete-modal-overlay").style.display = "none";
+        cardToDeleteId = null;
+      }
+
+      async function confirmDelete() {
+        if (cardToDeleteId) {
+          const { error } = await supabaseClient
+            .from("cards")
+            .delete()
+            .eq("id", cardToDeleteId);
+          if (!error) {
+            closeDeleteModal();
+            showView("cards-view");
+          } else {
+            alert("Error deleting: " + error.message);
+          }
+        }
+      }
+
+      async function saveCardToSupabase(cardData, id = null) {
+        let result;
+        if (id) {
+          // Update
+          result = await supabaseClient
+            .from("cards")
+            .update(cardData)
+            .eq("id", id);
+        } else {
+          // Insert
+          result = await supabaseClient.from("cards").insert([cardData]);
+        }
+
+        const { error } = result;
+
         if (error) {
           alert("Error al guardar: " + error.message);
         } else {
@@ -232,7 +664,7 @@
       async function logout() {
         const { error } = await supabaseClient.auth.signOut();
         if (!error) {
-          window.location.reload();
+          window.location.href = "index.html";
         }
       }
 
