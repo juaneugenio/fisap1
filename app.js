@@ -1,21 +1,21 @@
-// Estructura de datos local
+// Local data structure
 let data = {
   categories: [],
   cards: [],
 };
 
-// Inicializar Favoritos desde LocalStorage
+// Initialize Favorites from LocalStorage
 let favorites = JSON.parse(localStorage.getItem("flashlearn_favs")) || [];
 
 const container = document.getElementById("app-container");
 let currentViewMode = "categories";
 
-// Cargar datos desde Supabase
+// Load data from Supabase
 async function loadData() {
   container.innerHTML =
     '<p style="margin-top:2rem; color: var(--accent);">Lade Karten...</p>';
 
-  // 1. Cargar Categorías
+  // 1. Load Categories
   const { data: cats, error: catError } = await supabaseClient
     .from("categories")
     .select("name")
@@ -25,7 +25,7 @@ async function loadData() {
     data.categories = cats.map((c) => c.name);
   }
 
-  // 2. Cargar Tarjetas
+  // 2. Load Cards
   const { data: cards, error } = await supabaseClient
     .from("cards")
     .select("*")
@@ -36,7 +36,7 @@ async function loadData() {
     return;
   }
 
-  // Mapear datos de SQL (snake_case) a App (camelCase)
+  // Map SQL data (snake_case) to App (camelCase)
   data.cards = cards.map((c) => ({
     ...c,
     frontTitle: c.front_title,
@@ -49,7 +49,7 @@ async function loadData() {
 
 function renderCategories() {
   currentViewMode = "categories";
-  // Ocultar estadísticas de búsqueda al volver al home
+  // Hide search stats when returning home
   const statsEl = document.getElementById("searchStats");
   if (statsEl) statsEl.style.display = "none";
 
@@ -71,7 +71,7 @@ function renderCards(filter = null, mode = "category") {
   if (mode === "search") {
     const lowerFilter = filter.toLowerCase();
 
-    // Buscar en Título, Tags y Contenido (Front/Back) independientemente de si es número o texto
+    // Search in Title, Tags, and Content (Front/Back) regardless of whether it is a number or text
     filteredCards = data.cards.filter((c) => {
       if (c.frontTitle.toLowerCase().includes(lowerFilter)) return true;
       if (c.tags && c.tags.toLowerCase().includes(lowerFilter)) return true;
@@ -90,7 +90,7 @@ function renderCards(filter = null, mode = "category") {
     filteredCards = data.cards.filter((c) => c.category === filter);
   }
 
-  // Mostrar estadísticas solo si es una búsqueda
+  // Show stats only if searching
   const statsEl = document.getElementById("searchStats");
   if (statsEl) {
     if (mode === "search") {
@@ -112,17 +112,17 @@ function renderCards(filter = null, mode = "category") {
 
   filteredCards.forEach((card, index) => {
     const cardEl = document.createElement("div");
-    cardEl.className = "flashcard"; // Contenedor principal
-    cardEl.setAttribute("tabindex", "0"); // Hacer accesible por teclado (Tab)
-    cardEl.setAttribute("role", "button"); // Semántica para lectores de pantalla
-    cardEl.setAttribute("aria-pressed", "false"); // Estado inicial (no girada)
+    cardEl.className = "flashcard"; // Main container
+    cardEl.setAttribute("tabindex", "0"); // Make accessible via keyboard (Tab)
+    cardEl.setAttribute("role", "button"); // Semantics for screen readers
+    cardEl.setAttribute("aria-pressed", "false"); // Initial state (not flipped)
 
-    // Estado de favorito
+    // Favorite state
     const isFav = favorites.includes(card.id);
     const favIcon = isFav ? "★" : "☆";
     const favClass = isFav ? "active" : "";
 
-    // Sanitización de contenido HTML antes de renderizar (Seguridad XSS)
+    // HTML Content Sanitization (XSS Security)
     const safeCategory = DOMPurify.sanitize(card.category);
     const safeTitle = DOMPurify.sanitize(card.frontTitle);
     const safeFront = DOMPurify.sanitize(card.frontContent, {
@@ -132,7 +132,7 @@ function renderCards(filter = null, mode = "category") {
       ADD_ATTR: ["style"],
     });
 
-    // Procesar tags para visualización (separar por comas)
+    // Process tags for display (comma separated)
     const tagsList = card.tags
       ? card.tags
           .split(",")
@@ -162,11 +162,11 @@ function renderCards(filter = null, mode = "category") {
         </div>
     `;
 
-    // Lógica de flip con animación de altura y cierre automático
+    // Flip logic with height animation and auto-close
     cardEl.onclick = function () {
       const isFlipped = this.classList.contains("flipped");
 
-      // 1. Si abrimos una nueva (no estaba flipped), cerrar las otras
+      // 1. If opening a new one (not flipped), close others
       if (!isFlipped) {
         document.querySelectorAll(".flashcard.flipped").forEach((other) => {
           if (other !== this) {
@@ -178,17 +178,17 @@ function renderCards(filter = null, mode = "category") {
         });
       }
 
-      // 2. Alternar la actual con animación
+      // 2. Toggle current with animation
       animateHeight(this, () => {
         this.classList.toggle("flipped");
         this.setAttribute("aria-pressed", this.classList.contains("flipped"));
       });
     };
 
-    // Accesibilidad: Permitir girar con Enter o Espacio
+    // Accessibility: Allow flip with Enter or Space
     cardEl.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault(); // Evitar scroll con espacio
+        e.preventDefault(); // Prevent scroll with space
         cardEl.click();
       }
     });
@@ -197,9 +197,9 @@ function renderCards(filter = null, mode = "category") {
   updateFavHeader();
 }
 
-// Función global para manejar favoritos
+// Global function to handle favorites
 window.toggleFavorite = function (e, id) {
-  e.stopPropagation(); // Evitar que la tarjeta gire
+  e.stopPropagation(); // Prevent card flip
 
   const index = favorites.indexOf(id);
   const isRemoving = index !== -1;
@@ -210,11 +210,11 @@ window.toggleFavorite = function (e, id) {
     favorites.splice(index, 1);
   }
 
-  // Guardar en LocalStorage
+  // Save to LocalStorage
   localStorage.setItem("flashlearn_favs", JSON.stringify(favorites));
   updateFavHeader();
 
-  // Si estamos en vista favoritos y quitamos uno, eliminar del DOM inmediatamente
+  // If in favorites view and removing one, remove from DOM immediately
   if (currentViewMode === "favorites" && isRemoving) {
     const cardEl = e.target.closest(".flashcard");
     if (cardEl) cardEl.remove();
@@ -224,7 +224,7 @@ window.toggleFavorite = function (e, id) {
     return;
   }
 
-  // Actualizar UI de todos los botones de esta tarjeta (front y back)
+  // Update UI for all buttons on this card (front and back)
   const cardInner = e.target.closest(".flashcard-inner");
   const buttons = cardInner.querySelectorAll(".card-favorite-btn");
   const isFav = favorites.includes(id);
@@ -232,24 +232,24 @@ window.toggleFavorite = function (e, id) {
   buttons.forEach((btn) => {
     btn.innerHTML = isFav ? "★" : "☆";
     btn.classList.toggle("active", isFav);
-    // Reiniciar animación
+    // Reset animation
     btn.classList.remove("pop");
     void btn.offsetWidth; // Trigger reflow
     btn.classList.add("pop");
   });
 };
 
-// Botones de búsqueda
+// Search buttons
 document.getElementById("searchBtn").onclick = () => {
-  // Buenas prácticas: trim() elimina espacios al inicio y final
+  // Best practices: trim() removes whitespace
   const term = document.getElementById("searchInput").value.trim();
-  // Si después de limpiar está vacío, no hacemos nada (evita búsquedas vacías)
+  // If empty after trim, do nothing (avoids empty searches)
   if (term) {
     renderCards(term, "search");
   }
 };
 
-// Permitir búsqueda presionando la tecla Enter
+// Allow search by pressing Enter
 document.getElementById("searchInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     document.getElementById("searchBtn").click();
@@ -261,15 +261,15 @@ document.getElementById("resetBtn").onclick = () => {
   renderCategories();
 };
 
-// Helper para animar suavemente la altura del contenedor
+// Helper to smoothly animate container height
 function animateHeight(card, changeStateFn) {
   const currentHeight = card.offsetHeight;
   card.style.height = currentHeight + "px";
 
-  // Ejecutar el cambio de estado (clase flipped)
+  // Execute state change (flipped class)
   changeStateFn();
 
-  // Calcular nueva altura basada en el lado que será visible (relative)
+  // Calculate new height based on visible side
   const isFlipped = card.classList.contains("flipped");
   const front = card.querySelector(".front");
   const back = card.querySelector(".back");
@@ -278,7 +278,7 @@ function animateHeight(card, changeStateFn) {
   void card.offsetHeight; // Forzar reflow
   card.style.height = targetHeight + "px";
 
-  // Limpiar estilo inline después de la transición (0.5s coincide con CSS)
+  // Clear inline style after transition (0.5s matches CSS)
   setTimeout(() => {
     card.style.height = "";
   }, 500);
@@ -292,5 +292,5 @@ function updateFavHeader() {
   }
 }
 
-loadData(); // Iniciar carga de datos
+loadData(); // Start data loading
 updateFavHeader();

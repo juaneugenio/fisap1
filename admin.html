@@ -283,14 +283,11 @@
             />
 
             <label>Frontside Content (Details/Image)</label>
-            <div
-              id="editor-front"
-              style="background: white; color: black"
-            ></div>
+            <div id="editor-front"></div>
           </div>
           <div class="form-section">
             <label>Backside (Answer/Details)</label>
-            <div id="editor-back" style="background: white; color: black"></div>
+            <div id="editor-back"></div>
           </div>
         </form>
       </div>
@@ -307,9 +304,9 @@
           toolbar: [
             [{ header: [1, 2, 3, false] }],
             ["bold", "italic", "underline"],
-            [{ color: [] }, { background: [] }],
             [{ list: "ordered" }, { list: "bullet" }],
             [{ align: [] }],
+            [{ color: [] }, { background: [] }],
             ["blockquote", "code", "code-block"],
             ["link", "image"],
             ["clean"],
@@ -320,8 +317,8 @@
       const qFront = new Quill("#editor-front", quillConfig);
       const qBack = new Quill("#editor-back", quillConfig);
 
-      // --- MANEJO DE IMÁGENES CON SUPABASE STORAGE ---
-      // Sobrescribir el handler de imagen por defecto de Quill
+      // --- IMAGE HANDLING WITH SUPABASE STORAGE ---
+      // Override default Quill image handler
       qFront
         .getModule("toolbar")
         .addHandler("image", () => selectLocalImage(qFront));
@@ -346,12 +343,12 @@
       }
 
       async function saveImageToSupabase(file, quillInstance) {
-        // Generar nombre único: timestamp-random.ext
+        // Generate unique name: timestamp-random.ext
         const fileExt = file.name.split(".").pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `${fileName}`;
 
-        // Subir a Supabase Storage
+        // Upload to Supabase Storage
         const { data, error } = await supabaseClient.storage
           .from("card-images") // Nombre del bucket que creaste
           .upload(filePath, file);
@@ -361,30 +358,30 @@
           return;
         }
 
-        // Obtener URL pública
+        // Get public URL
         const {
           data: { publicUrl },
         } = supabaseClient.storage.from("card-images").getPublicUrl(filePath);
 
-        // Insertar imagen en el editor
+        // Insert image into editor
         const range = quillInstance.getSelection(true);
         quillInstance.insertEmbed(range.index, "image", publicUrl);
       }
 
-      // Variables globales
+      // Global variables
       let allCategories = [];
       let cardToDeleteId = null;
       let catToDeleteId = null;
       let catToDeleteName = null;
 
-      // Verificar sesión al cargar
+      // Check session on load
       async function checkSession() {
         const {
           data: { session },
         } = await supabaseClient.auth.getSession();
         if (session) {
           document.getElementById("login-overlay").style.display = "none";
-          loadCategories(); // Cargar categorías al iniciar
+          loadCategories(); // Load categories on init
           showView("dashboard-view");
         }
       }
@@ -411,9 +408,9 @@
         }
       }
 
-      // --- GESTIÓN DE VISTAS ---
+      // --- VIEW MANAGEMENT ---
       function showView(viewId) {
-        // Ocultar todas
+        // Hide all
         [
           "dashboard-view",
           "categories-view",
@@ -422,14 +419,14 @@
         ].forEach((id) => {
           document.getElementById(id).classList.add("hidden");
         });
-        // Mostrar seleccionada
+        // Show selected
         document.getElementById(viewId).classList.remove("hidden");
 
         if (viewId === "categories-view") renderCategoriesList();
-        if (viewId === "cards-view") searchAdminCards(); // Cargar todas al entrar
+        if (viewId === "cards-view") searchAdminCards(); // Load all on enter
       }
 
-      // --- GESTIÓN DE CATEGORÍAS ---
+      // --- CATEGORY MANAGEMENT ---
       async function loadCategories() {
         const { data, error } = await supabaseClient
           .from("categories")
@@ -492,7 +489,7 @@
         if (newName && newName.trim() !== "" && newName !== cat.name) {
           const trimmedName = newName.trim();
 
-          // 1. Actualizar nombre en tabla categories
+          // 1. Update name in categories table
           const { error: catError } = await supabaseClient
             .from("categories")
             .update({ name: trimmedName })
@@ -503,7 +500,7 @@
             return;
           }
 
-          // 2. Actualizar todas las tarjetas asociadas (Cascada manual)
+          // 2. Update all associated cards (Manual cascade)
           const { error: cardsError } = await supabaseClient
             .from("cards")
             .update({ category: trimmedName })
@@ -528,7 +525,7 @@
         catToDeleteId = id;
         catToDeleteName = cat.name;
 
-        // Contar tarjetas afectadas
+        // Count affected cards
         const { count, error } = await supabaseClient
           .from("cards")
           .select("*", { count: "exact", head: true })
@@ -548,13 +545,13 @@
       async function confirmDeleteCategory() {
         if (!catToDeleteId || !catToDeleteName) return;
 
-        // 1. Borrar tarjetas asociadas
+        // 1. Delete associated cards
         await supabaseClient
           .from("cards")
           .delete()
           .eq("category", catToDeleteName);
 
-        // 2. Borrar categoría
+        // 2. Delete category
         const { error } = await supabaseClient
           .from("categories")
           .delete()
@@ -576,7 +573,7 @@
         catToDeleteName = null;
       }
 
-      // Permitir búsqueda con Enter en Admin
+      // Allow search with Enter in Admin
       document
         .getElementById("adminSearchInput")
         .addEventListener("keypress", (e) => {
@@ -590,7 +587,7 @@
         searchAdminCards();
       }
 
-      // --- GESTIÓN DE TARJETAS ---
+      // --- CARD MANAGEMENT ---
       async function searchAdminCards() {
         const term = document.getElementById("adminSearchInput").value.trim();
         const list = document.getElementById("cards-list");
@@ -605,10 +602,10 @@
 
         if (term) {
           if (!isNaN(term)) {
-            // Es un número, buscar por ID
+            // Is a number, search by ID
             query = query.eq("id", term);
           } else {
-            // Es texto, buscar por título
+            // Is text, search by title
             query = query.ilike("front_title", `%${term}%`);
           }
         }
@@ -664,7 +661,7 @@
           const isBackEmpty =
             qBack.getText().trim().length === 0 && !backHtml.includes("<img");
 
-          // Validación: Frontside Content ya NO es obligatorio
+          // Validation: Frontside Content is NO LONGER mandatory
           if (!cat || !title || !tags || isBackEmpty) {
             const err = document.getElementById("formError");
             err.textContent = "Bitte füllen Sie alle Felder aus."; // Mensaje en alemán acorde a los modales
@@ -673,7 +670,7 @@
           }
           document.getElementById("formError").style.display = "none";
 
-          // Guardar en Supabase
+          // Save to Supabase
           const cardData = {
             category: cat,
             front_title: title,
