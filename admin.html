@@ -83,11 +83,11 @@
     <!-- Modal de Éxito -->
     <div id="modal-overlay">
       <div class="modal">
-        <h3>Karte geschpeichert!</h3>
-        <p>Eine weitere Karte erstellen?</p>
+        <h3 id="successModalTitle">Karte geschpeichert!</h3>
+        <p id="successModalMsg">Eine weitere Karte erstellen?</p>
         <div class="btn-group">
-          <button class="btn" onclick="resetForNew()">Ja</button>
-          <button class="btn btn-home" onclick="showView('cards-view')">
+          <button class="btn" id="successModalYesBtn">Ja</button>
+          <button class="btn btn-home" id="successModalNoBtn">
             Nein (Zurück)
           </button>
         </div>
@@ -186,31 +186,46 @@
 
       <!-- VISTA 3: TARJETAS (LISTA) -->
       <div id="cards-view" class="hidden">
-        <div style="display: flex; gap: 10px; margin-bottom: 20px">
-          <input
-            type="text"
-            id="adminSearchInput"
-            placeholder="Search by ID or Text..."
-          />
-          <button class="btn" onclick="searchAdminCards()">Search</button>
+        <h3>Manage Cards</h3>
+
+        <div class="btn-group" style="margin-bottom: 20px">
+          <button class="btn btn-home" onclick="showView('dashboard-view')">
+            Back to Dashboard
+          </button>
           <button
             class="btn"
             onclick="prepareCreateCard()"
             style="background: var(--accent); color: var(--bg-dark)"
           >
-            + New Card
+            Add a Card
           </button>
+        </div>
+
+        <div class="search-box" style="margin-bottom: 20px">
+          <input
+            type="text"
+            id="adminSearchInput"
+            placeholder="Search by ID or Text..."
+          />
+          <div class="btn-group">
+            <button class="btn btn-home" onclick="resetAdminSearch()">
+              Reset
+            </button>
+            <button class="btn" onclick="searchAdminCards()">Suchen</button>
+          </div>
+          <p
+            id="adminSearchStats"
+            style="
+              display: none;
+              margin-top: 10px;
+              color: var(--accent);
+              font-style: italic;
+            "
+          ></p>
         </div>
         <div id="cards-list" class="admin-list">
           <!-- Lista dinámica -->
         </div>
-        <button
-          class="btn btn-home"
-          onclick="showView('dashboard-view')"
-          style="margin-top: 20px"
-        >
-          Back to Dashboard
-        </button>
       </div>
 
       <!-- VISTA 4: FORMULARIO TARJETA (CREAR/EDITAR) -->
@@ -219,6 +234,35 @@
         <form id="cardForm">
           <input type="hidden" id="editCardId" />
           <!-- ID oculto para edición -->
+          <div class="btn-group" style="margin-bottom: 20px">
+            <button type="submit" class="btn" id="saveBtn">SAVE CARD</button>
+            <button
+              type="button"
+              class="btn"
+              id="deleteBtn"
+              style="background: #ff6b6b; color: white; display: none"
+              onclick="askDeleteCard()"
+            >
+              DELETE CARD
+            </button>
+            <button
+              type="button"
+              class="btn btn-cancel"
+              onclick="showView('cards-view')"
+            >
+              CANCEL
+            </button>
+          </div>
+          <p
+            id="formError"
+            style="
+              color: #ff6b6b;
+              display: none;
+              margin-bottom: 15px;
+              text-align: center;
+              font-weight: bold;
+            "
+          ></p>
           <div class="form-section">
             <label>Category</label>
             <select id="categorySelect">
@@ -248,26 +292,6 @@
             <label>Backside (Answer/Details)</label>
             <div id="editor-back" style="background: white; color: black"></div>
           </div>
-
-          <div class="btn-group">
-            <button type="submit" class="btn" id="saveBtn">SAVE CARD</button>
-            <button
-              type="button"
-              class="btn"
-              id="deleteBtn"
-              style="background: #ff6b6b; color: white; display: none"
-              onclick="askDeleteCard()"
-            >
-              DELETE CARD
-            </button>
-            <button
-              type="button"
-              class="btn btn-cancel"
-              onclick="showView('cards-view')"
-            >
-              CANCEL
-            </button>
-          </div>
         </form>
       </div>
     </div>
@@ -295,6 +319,57 @@
 
       const qFront = new Quill("#editor-front", quillConfig);
       const qBack = new Quill("#editor-back", quillConfig);
+
+      // --- MANEJO DE IMÁGENES CON SUPABASE STORAGE ---
+      // Sobrescribir el handler de imagen por defecto de Quill
+      qFront
+        .getModule("toolbar")
+        .addHandler("image", () => selectLocalImage(qFront));
+      qBack
+        .getModule("toolbar")
+        .addHandler("image", () => selectLocalImage(qBack));
+
+      function selectLocalImage(quillInstance) {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/*");
+        input.click();
+
+        input.onchange = async () => {
+          const file = input.files[0];
+          if (/^image\//.test(file.type)) {
+            await saveImageToSupabase(file, quillInstance);
+          } else {
+            alert("Nur Bilder sind erlaubt.");
+          }
+        };
+      }
+
+      async function saveImageToSupabase(file, quillInstance) {
+        // Generar nombre único: timestamp-random.ext
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        // Subir a Supabase Storage
+        const { data, error } = await supabaseClient.storage
+          .from("card-images") // Nombre del bucket que creaste
+          .upload(filePath, file);
+
+        if (error) {
+          alert("Error uploading image: " + error.message);
+          return;
+        }
+
+        // Obtener URL pública
+        const {
+          data: { publicUrl },
+        } = supabaseClient.storage.from("card-images").getPublicUrl(filePath);
+
+        // Insertar imagen en el editor
+        const range = quillInstance.getSelection(true);
+        quillInstance.insertEmbed(range.index, "image", publicUrl);
+      }
 
       // Variables globales
       let allCategories = [];
@@ -501,11 +576,27 @@
         catToDeleteName = null;
       }
 
+      // Permitir búsqueda con Enter en Admin
+      document
+        .getElementById("adminSearchInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            searchAdminCards();
+          }
+        });
+
+      function resetAdminSearch() {
+        document.getElementById("adminSearchInput").value = "";
+        searchAdminCards();
+      }
+
       // --- GESTIÓN DE TARJETAS ---
       async function searchAdminCards() {
         const term = document.getElementById("adminSearchInput").value.trim();
         const list = document.getElementById("cards-list");
+        const statsEl = document.getElementById("adminSearchStats");
         list.innerHTML = "<p>Loading...</p>";
+        if (statsEl) statsEl.style.display = "none";
 
         let query = supabaseClient
           .from("cards")
@@ -525,20 +616,29 @@
         const { data, error } = await query;
 
         list.innerHTML = "";
+
+        if (term && statsEl && data) {
+          if (data.length > 0) {
+            statsEl.style.display = "block";
+            statsEl.textContent = `${data.length} Karten gefunden`;
+          } else {
+            statsEl.style.display = "none";
+          }
+        }
+
         if (data && data.length > 0) {
           data.forEach((card) => {
             const item = document.createElement("div");
-            item.className = "admin-list-item";
+            item.className = "admin-card-item";
             item.innerHTML = `
-              <div style="flex: 0 0 50px; font-weight: bold;">#${card.id}</div>
-              <div style="flex: 2;">${card.front_title}</div>
-              <div style="flex: 1; color: var(--accent);">${card.category}</div>
-              <button class="btn" style="flex: 0 0 60px; padding: 5px;" onclick="editCard(${card.id})">✏️</button>
+              <span class="card-label">Card ${card.id} | ${DOMPurify.sanitize(card.category)}</span>
+              <div class="card-title-truncate">${DOMPurify.sanitize(card.front_title)}</div>
+              <button class="btn" style="flex: 0 0 auto; padding: 5px 10px;" onclick="editCard(${card.id})">✏️</button>
             `;
             list.appendChild(item);
           });
         } else {
-          list.innerHTML = "<p>No cards found.</p>";
+          list.innerHTML = "<p>Keine Karten gefunden.</p>";
         }
       }
 
@@ -561,15 +661,17 @@
             ADD_ATTR: ["style"],
           });
 
-          const isFrontEmpty =
-            qFront.getText().trim().length === 0 && !frontHtml.includes("<img");
           const isBackEmpty =
             qBack.getText().trim().length === 0 && !backHtml.includes("<img");
 
-          if (!cat || !title || !tags || isFrontEmpty || isBackEmpty) {
-            alert("Rellena todos los campos");
+          // Validación: Frontside Content ya NO es obligatorio
+          if (!cat || !title || !tags || isBackEmpty) {
+            const err = document.getElementById("formError");
+            err.textContent = "Bitte füllen Sie alle Felder aus."; // Mensaje en alemán acorde a los modales
+            err.style.display = "block";
             return;
           }
+          document.getElementById("formError").style.display = "none";
 
           // Guardar en Supabase
           const cardData = {
@@ -599,7 +701,9 @@
           .eq("id", id)
           .single();
         if (data) {
-          document.getElementById("formTitle").textContent = `Edit Card #${id}`;
+          document.getElementById("formError").style.display = "none";
+          document.getElementById("formTitle").textContent =
+            `Edit Card No. ${id}`;
           document.getElementById("saveBtn").textContent = "UPDATE CARD";
           document.getElementById("deleteBtn").style.display = "inline-block";
           document.getElementById("editCardId").value = id;
@@ -657,7 +761,43 @@
         if (error) {
           alert("Error al guardar: " + error.message);
         } else {
-          document.getElementById("modal-overlay").style.display = "flex";
+          showSuccessModal(id ? "update" : "create");
+        }
+      }
+
+      function showSuccessModal(mode) {
+        const overlay = document.getElementById("modal-overlay");
+        const title = document.getElementById("successModalTitle");
+        const msg = document.getElementById("successModalMsg");
+        const btnYes = document.getElementById("successModalYesBtn");
+        const btnNo = document.getElementById("successModalNoBtn");
+
+        overlay.style.display = "flex";
+
+        if (mode === "create") {
+          title.textContent = "Karte gespeichert!";
+          msg.textContent = "Eine weitere Karte erstellen?";
+          btnYes.textContent = "Ja";
+          btnYes.onclick = resetForNew;
+
+          btnNo.textContent = "Nein (Zurück)";
+          btnNo.onclick = () => {
+            overlay.style.display = "none";
+            showView("cards-view");
+          };
+        } else {
+          title.textContent = "Karte aktualisiert!";
+          msg.textContent = "Möchten Sie diese Karte weiter bearbeiten?";
+          btnYes.textContent = "Ja";
+          btnYes.onclick = () => {
+            overlay.style.display = "none";
+          };
+
+          btnNo.textContent = "Nein (Zurück)";
+          btnNo.onclick = () => {
+            overlay.style.display = "none";
+            showView("cards-view");
+          };
         }
       }
 
@@ -671,6 +811,7 @@
       function resetForNew() {
         document.getElementById("modal-overlay").style.display = "none";
         document.getElementById("cardForm").reset();
+        document.getElementById("formError").style.display = "none";
         qFront.setContents([]);
         qBack.setContents([]);
         window.scrollTo(0, 0);

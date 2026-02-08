@@ -71,25 +71,18 @@ function renderCards(filter = null, mode = "category") {
   if (mode === "search") {
     const lowerFilter = filter.toLowerCase();
 
-    // Si es un número, buscar SOLO por ID
-    if (!isNaN(lowerFilter)) {
-      filteredCards = data.cards.filter((c) => String(c.id) === lowerFilter);
-    } else {
-      // Si es texto, buscar en Título, Tags y Contenido
-      filteredCards = data.cards.filter((c) => {
-        if (c.frontTitle.toLowerCase().includes(lowerFilter)) return true;
-        if (c.tags && c.tags.toLowerCase().includes(lowerFilter)) return true;
+    // Buscar en Título, Tags y Contenido (Front/Back) independientemente de si es número o texto
+    filteredCards = data.cards.filter((c) => {
+      if (c.frontTitle.toLowerCase().includes(lowerFilter)) return true;
+      if (c.tags && c.tags.toLowerCase().includes(lowerFilter)) return true;
 
-        const cleanFront = c.frontContent
-          .replace(/<[^>]+>/g, " ")
-          .toLowerCase();
-        const cleanBack = c.backContent.replace(/<[^>]+>/g, " ").toLowerCase();
+      const cleanFront = c.frontContent.replace(/<[^>]+>/g, " ").toLowerCase();
+      const cleanBack = c.backContent.replace(/<[^>]+>/g, " ").toLowerCase();
 
-        return (
-          cleanFront.includes(lowerFilter) || cleanBack.includes(lowerFilter)
-        );
-      });
-    }
+      return (
+        cleanFront.includes(lowerFilter) || cleanBack.includes(lowerFilter)
+      );
+    });
   } else if (mode === "favorites") {
     filteredCards = data.cards.filter((c) => favorites.includes(c.id));
   } else {

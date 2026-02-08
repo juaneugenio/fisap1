@@ -291,6 +291,17 @@ select {
   margin-top: 10px;
 }
 
+/* Imágenes responsivas en tarjetas y editor */
+.front-content img,
+.back-content img,
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 10px auto;
+  border-radius: 4px;
+}
+
 /* Admin & Modales */
 .admin-container {
   width: 95%;
@@ -394,6 +405,29 @@ label {
   flex-direction: column;
   gap: 10px;
   margin-top: 20px;
+}
+
+.admin-card-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 40px 20px 20px 20px; /* Espacio superior para el label */
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+}
+
+.card-title-truncate {
+  font-weight: bold;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 15px;
+  flex: 1;
+  color: var(--text);
 }
 
 .admin-list-item {
