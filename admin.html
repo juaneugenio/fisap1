@@ -14,13 +14,29 @@
     <div id="login-overlay">
       <h2>Admin Panel</h2>
       <input
+        type="email"
+        id="emailInput"
+        style="max-width: 280px; margin-bottom: 10px"
+        placeholder="Email"
+      />
+      <input
         type="password"
         id="passInput"
         style="max-width: 280px; margin-bottom: 15px"
         placeholder="Enter password"
+        placeholder="Password"
       />
+      <p
+        id="loginError"
+        style="
+          color: #ff6b6b;
+          display: none;
+          margin-bottom: 10px;
+          font-size: 0.9rem;
+        "
+      ></p>
       <div class="btn-group" style="width: 280px">
-        <button class="btn" onclick="checkPass()">Login</button>
+        <button class="btn" onclick="login()">Login</button>
         <button
           class="btn btn-home"
           onclick="window.location.href = 'index.html'"
@@ -48,6 +64,23 @@
 
     <div class="admin-container">
       <h2>Create Flashcard</h2>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 2rem;
+          margin-bottom: 2.5rem;
+        "
+      >
+        <button
+          class="btn btn-home"
+          onclick="logout()"
+          style="padding: 8px 15px; font-size: 0.8rem; flex: 0 0 auto"
+        >
+          Logout
+        </button>
+      </div>
       <form id="cardForm">
         <div class="form-section">
           <label>Category</label>
@@ -117,11 +150,33 @@
       const qFront = new Quill("#editor-front", quillConfig);
       const qBack = new Quill("#editor-back", quillConfig);
 
-      function checkPass() {
-        if (document.getElementById("passInput").value === "1234") {
+      // Verificar sesión al cargar
+      async function checkSession() {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        if (session) {
           document.getElementById("login-overlay").style.display = "none";
+        }
+      }
+      checkSession();
+
+      async function login() {
+        const email = document.getElementById("emailInput").value;
+        const password = document.getElementById("passInput").value;
+        const errorEl = document.getElementById("loginError");
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+        if (error) {
+          errorEl.textContent = "Error: " + error.message;
+          errorEl.style.display = "block";
         } else {
-          alert("Wrong password");
+          errorEl.style.display = "none";
+          document.getElementById("login-overlay").style.display = "none";
         }
       }
 
@@ -171,6 +226,13 @@
           alert("Error al guardar: " + error.message);
         } else {
           document.getElementById("modal-overlay").style.display = "flex";
+        }
+      }
+
+      async function logout() {
+        const { error } = await supabaseClient.auth.signOut();
+        if (!error) {
+          window.location.reload();
         }
       }
 
