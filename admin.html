@@ -627,9 +627,16 @@
           data.forEach((card) => {
             const item = document.createElement("div");
             item.className = "admin-card-item";
+
+            // Formatear fecha (usar updated_at o created_at si no existe)
+            const dateStr = new Date(
+              card.updated_at || card.created_at,
+            ).toLocaleDateString("de-DE");
+
             item.innerHTML = `
               <span class="card-label">Card ${card.id} | ${DOMPurify.sanitize(card.category)}</span>
               <div class="card-title-truncate">${DOMPurify.sanitize(card.front_title)}</div>
+              <div style="font-size: 0.8rem; color: var(--accent); margin-right: 10px; white-space: nowrap;">${dateStr}</div>
               <button class="btn" style="flex: 0 0 auto; padding: 5px 10px;" onclick="editCard(${card.id})">✏️</button>
             `;
             list.appendChild(item);
@@ -677,6 +684,7 @@
             tags: tags,
             front_content: frontHtml,
             back_content: backHtml,
+            updated_at: new Date().toISOString(), // Guardar fecha de actualización
           };
 
           saveCardToSupabase(cardData, id);
