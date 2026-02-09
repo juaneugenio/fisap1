@@ -4,11 +4,16 @@
   --accent: #71b340;
   --border-color: #2a2a2b;
   --text: #c9e4ca;
-  --font-size-base: clamp(16.5px, 2vw + 10px, 20px);
+  /* Tipografía responsiva: 16px en móvil hasta 20px en escritorio */
+  --font-size-base: clamp(16px, 1vw + 12px, 20px);
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  font-size: var(--font-size-base);
 }
 
 body {
@@ -19,7 +24,8 @@ body {
   background-color: var(--bg-dark);
   color: var(--text);
   margin: 0;
-  font-size: var(--font-size-base);
+  font-size: 1rem;
+  line-height: 1.5;
   text-align: center;
 }
 
