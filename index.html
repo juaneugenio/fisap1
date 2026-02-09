@@ -8,7 +8,9 @@
   </head>
   <body>
     <header>
-      <h1 onclick="location.reload()" style="cursor: pointer">FlAp1 Cards</h1>
+      <a href="/" class="header-link">
+        <h1>FlAp1 Cards</h1>
+      </a>
 
       <div class="nav-container">
         <a href="admin.html" class="nav-link">Dashboard</a>
@@ -24,15 +26,7 @@
           <button class="btn btn-home" id="resetBtn">Home</button>
           <button class="btn" id="searchBtn">Suchen</button>
         </div>
-        <p
-          id="searchStats"
-          style="
-            display: none;
-            margin-top: 10px;
-            color: var(--accent);
-            font-style: italic;
-          "
-        ></p>
+        <p id="searchStats" class="search-stats"></p>
       </div>
     </header>
 

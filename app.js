@@ -1,7 +1,6 @@
 // Local data structure
 let data = {
   categories: [],
-  cards: [],
 };
 
 // Initialize Favorites from LocalStorage
@@ -11,9 +10,9 @@ const container = document.getElementById("app-container");
 let currentViewMode = "categories";
 
 // Load data from Supabase
-async function loadData() {
+async function loadInitialData() {
   container.innerHTML =
-    '<p style="margin-top:2rem; color: var(--accent);">Lade Karten...</p>';
+    '<p style="margin-top:2rem; color: var(--accent);">Lade Kategorien...</p>';
 
   // 1. Load Categories
   const { data: cats, error: catError } = await supabaseClient
@@ -21,28 +20,14 @@ async function loadData() {
     .select("name")
     .order("name");
 
-  if (!catError && cats) {
-    data.categories = cats.map((c) => c.name);
-  }
-
-  // 2. Load Cards
-  const { data: cards, error } = await supabaseClient
-    .from("cards")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    container.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+  if (catError) {
+    container.innerHTML = `<p style="color: red;">Error: ${catError.message}</p>`;
     return;
   }
 
-  // Map SQL data (snake_case) to App (camelCase)
-  data.cards = cards.map((c) => ({
-    ...c,
-    frontTitle: c.front_title,
-    frontContent: c.front_content,
-    backContent: c.back_content,
-  }));
+  if (cats) {
+    data.categories = cats.map((c) => c.name);
+  }
 
   renderCategories();
 }
@@ -58,44 +43,63 @@ function renderCategories() {
     const div = document.createElement("div");
     div.className = "category-item";
     div.innerHTML = `<h3>${cat}</h3>`;
-    div.onclick = () => renderCards(cat);
+    div.onclick = () => loadAndRenderCards(cat, "category");
     container.appendChild(div);
   });
 }
 
-function renderCards(filter = null, mode = "category") {
+async function loadAndRenderCards(filter = null, mode = "category") {
+  container.innerHTML =
+    '<p style="margin-top:2rem; color: var(--accent);">Lade Karten...</p>';
+
+  let query = supabaseClient.from("cards").select("*");
+
+  // Build query based on the mode
+  if (mode === "category") {
+    query = query
+      .eq("category", filter)
+      .order("created_at", { ascending: false });
+  } else if (mode === "search") {
+    // Search in title and tags. For full-text search on content, a DB function would be better.
+    query = query
+      .or(`front_title.ilike.%${filter}%,tags.ilike.%${filter}%`)
+      .order("created_at", { ascending: false });
+  } else if (mode === "favorites") {
+    if (favorites.length === 0) {
+      renderCardsUI([], mode); // Render empty state immediately
+      return;
+    }
+    query = query.in("id", favorites).order("created_at", { ascending: false });
+  }
+
+  const { data: cards, error } = await query;
+
+  if (error) {
+    container.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+    return;
+  }
+
+  // Map SQL data (snake_case) to App (camelCase)
+  const mappedCards = cards.map((c) => ({
+    ...c,
+    frontTitle: c.front_title,
+    frontContent: c.front_content,
+    backContent: c.back_content,
+  }));
+
+  renderCardsUI(mappedCards, mode, filter);
+}
+
+function renderCardsUI(filteredCards, mode, originalFilter = null) {
   currentViewMode = mode;
   container.innerHTML = "";
-  let filteredCards = [];
-
-  if (mode === "search") {
-    const lowerFilter = filter.toLowerCase();
-
-    // Search in Title, Tags, and Content (Front/Back) regardless of whether it is a number or text
-    filteredCards = data.cards.filter((c) => {
-      if (c.frontTitle.toLowerCase().includes(lowerFilter)) return true;
-      if (c.tags && c.tags.toLowerCase().includes(lowerFilter)) return true;
-
-      const cleanFront = c.frontContent.replace(/<[^>]+>/g, " ").toLowerCase();
-      const cleanBack = c.backContent.replace(/<[^>]+>/g, " ").toLowerCase();
-
-      return (
-        cleanFront.includes(lowerFilter) || cleanBack.includes(lowerFilter)
-      );
-    });
-  } else if (mode === "favorites") {
-    filteredCards = data.cards.filter((c) => favorites.includes(c.id));
-  } else {
-    // mode === 'category'
-    filteredCards = data.cards.filter((c) => c.category === filter);
-  }
 
   // Show stats only if searching
   const statsEl = document.getElementById("searchStats");
   if (statsEl) {
     if (mode === "search") {
       statsEl.style.display = "block";
-      statsEl.textContent = `Suchergebnisse: ${filteredCards.length}`;
+      statsEl.textContent = `Suchergebnisse für "${originalFilter}": ${filteredCards.length}`;
     } else {
       statsEl.style.display = "none";
     }
@@ -239,13 +243,17 @@ window.toggleFavorite = function (e, id) {
   });
 };
 
+// Update favorites link to use the new function
+document.querySelector('a[onclick*="favorites"]').onclick = () =>
+  loadAndRenderCards(null, "favorites");
+
 // Search buttons
 document.getElementById("searchBtn").onclick = () => {
   // Best practices: trim() removes whitespace
   const term = document.getElementById("searchInput").value.trim();
   // If empty after trim, do nothing (avoids empty searches)
   if (term) {
-    renderCards(term, "search");
+    loadAndRenderCards(term, "search");
   }
 };
 
@@ -292,5 +300,5 @@ function updateFavHeader() {
   }
 }
 
-loadData(); // Start data loading
+loadInitialData(); // Start data loading
 updateFavHeader();
