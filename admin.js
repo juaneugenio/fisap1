@@ -302,13 +302,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .order("created_at", { ascending: false });
 
     if (term) {
-      if (!isNaN(term)) {
-        // Is a number, search by ID
-        query = query.eq("id", term);
-      } else {
-        // Is text, search by title
-        query = query.ilike("front_title", `%${term}%`);
-      }
+      // Comprehensive search across title, tags, and content
+      const searchFilter = `front_title.ilike.%${term}%,tags.ilike.%${term}%,front_content.ilike.%${term}%,back_content.ilike.%${term}%`;
+      query = query.or(searchFilter);
     }
 
     const { data, error } = await query;
@@ -337,8 +333,8 @@ document.addEventListener("DOMContentLoaded", () => {
         item.innerHTML = `
           <span class="card-label">Card ${card.id} | ${DOMPurify.sanitize(card.category)}</span>
           <div class="card-title-truncate">${DOMPurify.sanitize(card.front_title)}</div>
-          <div style="font-size: 0.8rem; color: var(--accent); margin-right: 10px; white-space: nowrap;">${dateStr}</div>
-          <button class="btn btn-edit-card" style="flex: 0 0 auto; padding: 5px 10px;" data-id="${card.id}">✏️</button>
+          <div style="font-size: 0.65rem; color: #3A5F1F; margin-right: 10px; white-space: nowrap;">${dateStr}</div>
+          <button class="btn btn-edit-card" style="flex: 0 0 auto; padding: 5px 10px;" data-id="${card.id}">edit</button>
         `;
         list.appendChild(item);
       });

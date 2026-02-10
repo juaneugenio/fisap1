@@ -39,12 +39,19 @@ function renderCategories() {
   if (statsEl) statsEl.style.display = "none";
 
   container.innerHTML = "";
-  data.categories.forEach((cat) => {
+  data.categories.forEach((cat, index) => {
     const div = document.createElement("div");
-    div.className = "category-item";
+    div.className = "category-item will-cascade-in";
     div.innerHTML = `<h3>${cat}</h3>`;
     div.onclick = () => loadAndRenderCards(cat, "category");
+    // Stagger the animation delay for each item
+    div.style.transitionDelay = `${index * 50}ms`;
     container.appendChild(div);
+
+    // Use requestAnimationFrame to trigger the animation on the next frame
+    requestAnimationFrame(() => {
+      div.classList.remove("will-cascade-in");
+    });
   });
 }
 
@@ -60,10 +67,9 @@ async function loadAndRenderCards(filter = null, mode = "category") {
       .eq("category", filter)
       .order("created_at", { ascending: false });
   } else if (mode === "search") {
-    // Search in title and tags. For full-text search on content, a DB function would be better.
-    query = query
-      .or(`front_title.ilike.%${filter}%,tags.ilike.%${filter}%`)
-      .order("created_at", { ascending: false });
+    // Comprehensive search across title, tags, and content
+    const searchFilter = `front_title.ilike.%${filter}%,tags.ilike.%${filter}%,front_content.ilike.%${filter}%,back_content.ilike.%${filter}%`;
+    query = query.or(searchFilter).order("created_at", { ascending: false });
   } else if (mode === "favorites") {
     if (favorites.length === 0) {
       renderCardsUI([], mode); // Render empty state immediately
@@ -116,10 +122,11 @@ function renderCardsUI(filteredCards, mode, originalFilter = null) {
 
   filteredCards.forEach((card, index) => {
     const cardEl = document.createElement("div");
-    cardEl.className = "flashcard"; // Main container
+    cardEl.className = "flashcard will-cascade-in"; // Add animation class
     cardEl.setAttribute("tabindex", "0"); // Make accessible via keyboard (Tab)
     cardEl.setAttribute("role", "button"); // Semantics for screen readers
     cardEl.setAttribute("aria-pressed", "false"); // Initial state (not flipped)
+    cardEl.style.transitionDelay = `${index * 50}ms`; // Stagger animation
 
     // Favorite state
     const isFav = favorites.includes(card.id);
@@ -197,6 +204,11 @@ function renderCardsUI(filteredCards, mode, originalFilter = null) {
       }
     });
     container.appendChild(cardEl);
+
+    // Use requestAnimationFrame to trigger the animation on the next frame
+    requestAnimationFrame(() => {
+      cardEl.classList.remove("will-cascade-in");
+    });
   });
   updateFavHeader();
 }

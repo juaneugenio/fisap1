@@ -122,7 +122,19 @@ select {
   background: #ff6b6b;
   color: white;
 }
-
+.btn-edit-card {
+  background: var(--border-color);
+  color: var(--accent);
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition:
+    transform 0.2s,
+    filter 0.2s;
+}
 /* Grid System: 1 col mobile, 2 col rest */
 #app-container {
   display: grid;
@@ -140,7 +152,11 @@ select {
   border-radius: 0.75rem; /* 12px */
   border: 1px solid var(--border-color);
   cursor: pointer;
-  transition: transform 0.2s;
+  /* Added opacity and adjusted transform for cascade animation */
+  transition:
+    transform 0.4s ease-out,
+    opacity 0.4s ease-out,
+    filter 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,11 +169,12 @@ select {
 /* Flashcards Adaptive Height */
 .flashcard {
   perspective: 1000px;
-  /* margin-bottom: 20px; */
   width: 100%;
+  /* Added opacity and adjusted transform for cascade animation */
   transition:
     height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.3s ease;
+    transform 0.3s ease,
+    opacity 0.4s ease-out;
 }
 
 .flashcard:hover {
@@ -549,6 +566,12 @@ label {
   border-top: none;
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
+}
+
+/* Helper class for cascade-in animation */
+.will-cascade-in {
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 /* --- MOBILE OPTIMIZATION --- */
