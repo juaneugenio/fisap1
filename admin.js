@@ -348,9 +348,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const id = document.getElementById("editCardId").value;
     const cat = document.getElementById("categorySelect").value;
     const title = DOMPurify.sanitize(
-      document.getElementById("frontTitle").value,
+      document.getElementById("frontTitle").value.trim(),
     );
-    const tags = DOMPurify.sanitize(document.getElementById("tags").value);
+    const tags = DOMPurify.sanitize(
+      document.getElementById("tags").value.trim(),
+    );
     const frontHtml = DOMPurify.sanitize(qFront.root.innerHTML.trim(), {
       ADD_ATTR: ["style"],
     });
