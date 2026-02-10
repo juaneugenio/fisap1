@@ -4,7 +4,7 @@
   --accent: #71b340;
   --border-color: #2a2a2b;
   --text: #c9e4ca;
-  /* Tipografía responsiva: 16px en móvil hasta 20px en escritorio */
+  /* Responsive typography: 16px on mobile up to 20px on desktop */
   --font-size-base: clamp(16px, 1vw + 12px, 20px);
 }
 
@@ -39,7 +39,7 @@ header {
   color: inherit;
 }
 
-/* Contenedor de navegación */
+/* Navigation container */
 .nav-container {
   display: flex;
   justify-content: center;
@@ -64,7 +64,7 @@ header {
   text-decoration: underline;
 }
 
-/* Buscador y Botones */
+/* Search and Buttons */
 .search-box {
   max-width: 500px;
   margin: 0 auto;
@@ -123,7 +123,7 @@ select {
   color: white;
 }
 
-/* Grid Sistema: 1 col móvil, 2 col resto */
+/* Grid System: 1 col mobile, 2 col rest */
 #app-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -133,7 +133,7 @@ select {
   margin: 0 auto;
 }
 
-/* Categorías */
+/* Categories */
 .category-item {
   background: var(--card-bg);
   padding: 1rem;
@@ -147,11 +147,10 @@ select {
 }
 .category-item:hover {
   transform: translateY(-5px);
-  /* background: var(--border-color); */
   filter: brightness(1.3);
 }
 
-/* Flashcards Altura Adaptable */
+/* Flashcards Adaptive Height */
 .flashcard {
   perspective: 1000px;
   /* margin-bottom: 20px; */
@@ -166,7 +165,7 @@ select {
   filter: brightness(1.2);
 }
 
-/* Accesibilidad: Foco visible para navegación por teclado */
+/* Accessibility: Visible focus for keyboard navigation */
 .flashcard:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
@@ -189,7 +188,7 @@ select {
 .front,
 .back {
   backface-visibility: hidden;
-  padding: 3rem 1.25rem 1.8rem 1.25rem; /* Dynamic padding */
+  padding: 3rem 1.25rem 1.2rem 1.25rem; /* Dynamic padding */
   border-radius: 0.75rem;
   border: 1px solid var(--border-color);
   background: var(--card-bg);
@@ -233,9 +232,9 @@ select {
   font-weight: bold;
 }
 
-/* Estilos para Tags en la tarjeta */
+/* Styles for Tags on the card */
 .card-tags {
-  margin-top: auto; /* Empuja los tags al fondo */
+  margin-top: auto; /* Push tags to the bottom */
   padding-top: 1rem;
   display: flex;
   flex-wrap: wrap;
@@ -252,14 +251,14 @@ select {
   letter-spacing: 0.5px;
 }
 
-/* Botón de Favoritos (Estrella) */
+/* Favorite Button (Star) */
 .card-favorite-btn {
   position: absolute;
   top: 0.625rem;
   right: 1rem;
   background: none;
   border: none;
-  font-size: 1.8rem;
+  font-size: 1.8rem; /* 28.8px */
   cursor: pointer;
   color: var(--border-color); /* Color para estado vacío (☆) */
   z-index: 10;
@@ -276,7 +275,7 @@ select {
 }
 
 .card-favorite-btn.active {
-  color: #ffd700; /* Dorado para estado lleno (★) */
+  color: #ffd700; /* Gold for filled state (★) */
 }
 
 .card-favorite-btn.pop {
@@ -304,10 +303,10 @@ select {
 .front-content,
 .back-content {
   text-align: left;
-  margin-top: 0.625rem;
+  /* margin-top: 0.625rem; */
 }
 
-/* Imágenes responsivas en tarjetas y editor */
+/* Responsive images in cards and editor */
 .front-content img,
 .back-content img,
 .ql-editor img {
@@ -318,7 +317,7 @@ select {
   border-radius: 0.25rem;
 }
 
-/* Admin & Modales */
+/* Admin & Modals */
 .admin-container {
   width: 95%;
   max-width: 700px;
@@ -327,7 +326,6 @@ select {
 }
 .admin-container h2 {
   color: var(--accent);
-  /* margin-top: 2rem; */
 }
 .form-section {
   display: flex;
@@ -337,7 +335,6 @@ select {
   border-radius: 0.5rem;
   margin-bottom: 1.25rem;
   text-align: left;
-  /* text-align: left; */
 }
 
 .form-error-msg {
@@ -473,7 +470,7 @@ label {
 .admin-card-item {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  padding: 2.5rem 1.25rem 1.25rem 1.25rem; /* Espacio superior para el label */
+  padding: 2.5rem 1.25rem 1.25rem 1.25rem; /* Top space for the label */
   border-radius: 0.75rem;
   position: relative;
   display: flex;
@@ -523,7 +520,7 @@ label {
   overflow-y: auto;
 }
 
-/* Personalización Quill Toolbar */
+/* Quill Toolbar Customization */
 .ql-toolbar.ql-snow {
   background-color: var(--accent);
   border-color: var(--accent);
@@ -543,7 +540,7 @@ label {
   color: var(--bg-dark);
 }
 
-/* Estilos del Editor para coincidir con el tema oscuro (Cards) */
+/* Editor Styles to match dark theme (Cards) */
 #editor-front,
 #editor-back {
   background-color: var(--card-bg);
@@ -562,7 +559,7 @@ label {
   }
 
   .form-section {
-    padding: 0.4rem; /* Reduce padding to give more space to editor */
+    padding: 0.4rem; /* Reduce padding for more editor space */
   }
 
   .admin-card-item {

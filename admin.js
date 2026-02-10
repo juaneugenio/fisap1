@@ -49,11 +49,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Upload to Supabase Storage
     const { data, error } = await supabaseClient.storage
-      .from("card-images") // Nombre del bucket que creaste
+      .from("card-images") // Name of the bucket you created
       .upload(filePath, file);
 
     if (error) {
-      alert("Error uploading image: " + error.message);
+      alert("Fehler beim Hochladen des Bildes: " + error.message);
       return;
     }
 
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (session) {
       // Check for the secure admin claim from the JWT's app_metadata
       if (session.user.app_metadata?.admin !== true) {
-        alert("Access Denied. You are not an administrator.");
+        alert("Zugriff verweigert. Sie sind kein Administrator.");
         // Securely log out the user and redirect
         await supabaseClient.auth.signOut();
         window.location.href = "index.html";
@@ -105,12 +105,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (error) {
-      errorEl.textContent = "Error: " + error.message;
+      errorEl.textContent = "Fehler: " + error.message;
       errorEl.style.display = "block";
     } else {
       // Check for the secure admin claim after login
       if (data.user.app_metadata?.admin !== true) {
-        errorEl.textContent = "Access Denied. You are not an administrator.";
+        errorEl.textContent =
+          "Zugriff verweigert. Sie sind kein Administrator.";
         errorEl.style.display = "block";
         await supabaseClient.auth.signOut(); // Log them out immediately
         return;
@@ -137,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById(viewId).classList.remove("hidden");
 
     if (viewId === "categories-view") renderCategoriesList();
-    if (viewId === "cards-view") searchAdminCards(); // Load all on enter
+    if (viewId === "cards-view") searchAdminCards(); // Load all on view entry
   }
 
   // --- CATEGORY MANAGEMENT ---
@@ -154,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateCategorySelect() {
     const select = document.getElementById("categorySelect");
-    select.innerHTML = '<option value="">☞ Select Category</option>';
+    select.innerHTML = '<option value="">☞ Kategorie auswählen</option>';
     allCategories.forEach((cat) => {
       const option = document.createElement("option");
       option.value = cat.name;
@@ -191,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await loadCategories();
       renderCategoriesList();
     } else {
-      alert("Error: " + error.message);
+      alert("Fehler: " + error.message);
     }
   }
 
@@ -220,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .eq("id", catToEditId);
 
       if (catError) {
-        alert("Error updating category: " + catError.message);
+        alert("Fehler beim Aktualisieren der Kategorie: " + catError.message);
         return;
       }
 
@@ -249,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .eq("category", cat.name);
 
     if (error) {
-      alert("Error counting cards: " + error.message);
+      alert("Fehler beim Zählen der Karten: " + error.message);
       return;
     }
 
@@ -268,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .eq("id", catToDeleteId);
 
     if (error) {
-      alert("Error deleting category: " + error.message);
+      alert("Fehler beim Löschen der Kategorie: " + error.message);
     } else {
       closeDeleteCatModal();
       await loadCategories();
@@ -292,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const term = document.getElementById("adminSearchInput").value.trim();
     const list = document.getElementById("cards-list");
     const statsEl = document.getElementById("adminSearchStats");
-    list.innerHTML = "<p>Loading...</p>";
+    list.innerHTML = "<p>Laden...</p>";
     if (statsEl) statsEl.style.display = "none";
 
     let query = supabaseClient
@@ -328,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const item = document.createElement("div");
         item.className = "admin-card-item";
 
-        // Formatear fecha (usar updated_at o created_at si no existe)
+        // Format date (use updated_at or created_at if it doesn't exist)
         const dateStr = new Date(
           card.updated_at || card.created_at,
         ).toLocaleDateString("de-DE");
@@ -364,10 +365,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const isBackEmpty =
       qBack.getText().trim().length === 0 && !backHtml.includes("<img");
 
-    // Validation: Frontside Content is NO LONGER mandatory
+    // Validation
     if (!cat || !title || !tags || isBackEmpty) {
       const err = document.getElementById("formError");
-      err.textContent = "Bitte füllen Sie alle Felder aus."; // Mensaje en alemán acorde a los modales
+      err.textContent = "Bitte füllen Sie alle Felder aus."; // German message consistent with modals
       err.style.display = "block";
       return;
     }
@@ -380,7 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tags: tags,
       front_content: frontHtml,
       back_content: backHtml,
-      updated_at: new Date().toISOString(), // Guardar fecha de actualización
+      updated_at: new Date().toISOString(), // Save update date
     };
 
     saveCardToSupabase(cardData, id);
@@ -388,8 +389,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function prepareCreateCard() {
     resetForNew();
-    document.getElementById("formTitle").textContent = "Create Flashcard";
-    document.getElementById("saveBtn").textContent = "SAVE CARD";
+    document.getElementById("formTitle").textContent = "Flashcard erstellen";
+    document.getElementById("saveBtn").textContent = "KARTE SPEICHERN";
     document.getElementById("deleteBtn").style.display = "none";
     document.getElementById("editCardId").value = "";
     showView("card-form-view");
@@ -403,8 +404,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .single();
     if (data) {
       document.getElementById("formError").style.display = "none";
-      document.getElementById("formTitle").textContent = `Edit Card No. ${id}`;
-      document.getElementById("saveBtn").textContent = "UPDATE CARD";
+      document.getElementById("formTitle").textContent =
+        `Karte Nr. ${id} bearbeiten`;
+      document.getElementById("saveBtn").textContent = "KARTE AKTUALISIEREN";
       document.getElementById("deleteBtn").style.display = "inline-block";
       document.getElementById("editCardId").value = id;
 
@@ -438,7 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
         closeDeleteModal();
         showView("cards-view");
       } else {
-        alert("Error deleting: " + error.message);
+        alert("Fehler beim Löschen: " + error.message);
       }
     }
   }
@@ -456,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const { error } = result;
 
     if (error) {
-      alert("Error al guardar: " + error.message);
+      alert("Fehler beim Speichern: " + error.message);
     } else {
       showSuccessModal(id ? "update" : "create");
     }

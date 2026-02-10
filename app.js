@@ -21,7 +21,7 @@ async function loadInitialData() {
     .order("name");
 
   if (catError) {
-    container.innerHTML = `<p style="color: red;">Error: ${catError.message}</p>`;
+    container.innerHTML = `<p style="color: red;">Fehler: ${catError.message}</p>`;
     return;
   }
 
@@ -75,7 +75,7 @@ async function loadAndRenderCards(filter = null, mode = "category") {
   const { data: cards, error } = await query;
 
   if (error) {
-    container.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+    container.innerHTML = `<p style="color: red;">Fehler: ${error.message}</p>`;
     return;
   }
 
@@ -283,7 +283,7 @@ function animateHeight(card, changeStateFn) {
   const back = card.querySelector(".back");
   const targetHeight = isFlipped ? back.offsetHeight : front.offsetHeight;
 
-  void card.offsetHeight; // Forzar reflow
+  void card.offsetHeight; // Force reflow
   card.style.height = targetHeight + "px";
 
   // Clear inline style after transition (0.5s matches CSS)

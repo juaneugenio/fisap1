@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="es">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Panel</title>
+    <title>Admin-Panel</title>
     <link
       href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
       rel="stylesheet"
@@ -12,23 +12,23 @@
   </head>
   <body>
     <div id="login-overlay">
-      <h2>Admin Panel</h2>
+      <h2>Admin-Panel</h2>
       <input
         type="email"
         id="emailInput"
         style="max-width: 280px; margin-bottom: 10px"
-        placeholder="Email"
+        placeholder="E-Mail"
       />
       <input
         type="password"
         id="passInput"
         class="login-input"
-        placeholder="Password"
+        placeholder="Passwort"
       />
       <p id="loginError" class="form-error-msg"></p>
       <div class="btn-group login-btn-group">
-        <button class="btn" id="loginBtn">Login</button>
-        <button class="btn btn-home" id="exitLoginBtn">Exit</button>
+        <button class="btn" id="loginBtn">Anmelden</button>
+        <button class="btn btn-home" id="exitLoginBtn">Verlassen</button>
       </div>
     </div>
 
@@ -84,7 +84,7 @@
         <input
           type="text"
           id="editCatInput"
-          placeholder="Category Name"
+          placeholder="Kategoriename"
           style="margin-bottom: 1rem"
         />
         <div class="btn-group">
@@ -98,9 +98,9 @@
       <!-- Header Admin -->
       <div class="admin-header">
         <h2 class="admin-header-title" data-view-target="dashboard-view">
-          Admin Panel
+          Admin-Panel
         </h2>
-        <button class="btn btn-home btn-logout">Logout ➜</button>
+        <button class="btn btn-home btn-logout">Abmelden ➜</button>
       </div>
 
       <!-- VISTA 1: DASHBOARD -->
@@ -108,25 +108,29 @@
         <div class="dashboard-menu">
           <div class="dashboard-card" data-view-target="categories-view">
             <span style="font-size: 2rem">📂</span>
-            <h3>Admin Categories</h3>
+            <h3>Kategorien verwalten</h3>
           </div>
           <div class="dashboard-card" data-view-target="cards-view">
             <span style="font-size: 2rem">🗂️</span>
-            <h3>Admin Cards</h3>
+            <h3>Karten verwalten</h3>
           </div>
         </div>
       </div>
 
       <!-- VISTA 2: CATEGORIAS -->
       <div id="categories-view" class="hidden">
-        <h3>Manage Categories</h3>
+        <h3>Kategorien verwalten</h3>
         <div class="search-box" style="margin-bottom: 1.25rem">
-          <input type="text" id="newCatInput" placeholder="New Category Name" />
+          <input
+            type="text"
+            id="newCatInput"
+            placeholder="Neuer Kategoriename"
+          />
           <div class="btn-group">
             <button class="btn btn-home" data-view-target="dashboard-view">
-              Back to Dashboard
+              Zurück zum Dashboard
             </button>
-            <button class="btn" id="addCatBtn">Add</button>
+            <button class="btn" id="addCatBtn">Hinzufügen</button>
           </div>
         </div>
         <div id="categories-list" class="admin-list">
@@ -136,23 +140,25 @@
 
       <!-- VISTA 3: TARJETAS (LISTA) -->
       <div id="cards-view" class="hidden">
-        <h3>Manage Cards</h3>
+        <h3>Karten verwalten</h3>
 
         <div class="btn-group" style="margin-bottom: 1.25rem">
           <button class="btn btn-home" data-view-target="dashboard-view">
-            Back to Dashboard
+            Zurück zum Dashboard
           </button>
-          <button class="btn" id="addCardBtn">Add a Card</button>
+          <button class="btn" id="addCardBtn">Karte hinzufügen</button>
         </div>
 
         <div class="search-box" style="margin-bottom: 1.25rem">
           <input
             type="text"
             id="adminSearchInput"
-            placeholder="Search by ID or Text..."
+            placeholder="Suche nach ID oder Text..."
           />
           <div class="btn-group">
-            <button class="btn btn-home" id="resetAdminSearchBtn">Reset</button>
+            <button class="btn btn-home" id="resetAdminSearchBtn">
+              Zurücksetzen
+            </button>
             <button class="btn" id="searchAdminBtn">Suchen</button>
           </div>
           <p id="adminSearchStats" class="search-stats"></p>
@@ -164,26 +170,28 @@
 
       <!-- VISTA 4: FORMULARIO TARJETA (CREAR/EDITAR) -->
       <div id="card-form-view" class="hidden">
-        <h3 id="formTitle">Create Flashcard</h3>
+        <h3 id="formTitle">Flashcard erstellen</h3>
         <form id="cardForm">
           <input type="hidden" id="editCardId" />
           <!-- ID oculto para edición -->
           <div class="btn-group" style="margin-bottom: 1.25rem">
-            <button type="submit" class="btn" id="saveBtn">SAVE CARD</button>
+            <button type="submit" class="btn" id="saveBtn">
+              KARTE SPEICHERN
+            </button>
             <button
               type="button"
               class="btn btn-danger"
               id="deleteBtn"
               style="display: none"
             >
-              DELETE CARD
+              KARTE LÖSCHEN
             </button>
             <button
               type="button"
               class="btn btn-cancel"
               data-view-target="cards-view"
             >
-              CANCEL
+              ABBRECHEN
             </button>
           </div>
           <p
@@ -192,29 +200,33 @@
             style="text-align: center"
           ></p>
           <div class="form-section">
-            <label>Category</label>
+            <label>Kategorie</label>
             <select id="categorySelect">
-              <option value="">Loading...</option>
+              <option value="">Laden...</option>
             </select>
           </div>
           <div class="form-section">
             <label>Tags</label>
-            <input type="text" id="tags" placeholder="scrum, tech, security" />
+            <input
+              type="text"
+              id="tags"
+              placeholder="Scrum, Technik, Sicherheit"
+            />
           </div>
           <div class="form-section">
-            <label>Frontside Title (Question)</label>
+            <label>Vorderseite Titel (Frage)</label>
             <input
               type="text"
               id="frontTitle"
-              placeholder="Ej: ¿Qué es GDPR?"
+              placeholder="z.B. Was ist die DSGVO?"
               style="margin-bottom: 1rem"
             />
 
-            <label>Frontside Content (Details/Image)</label>
+            <label>Vorderseite Inhalt (Details/Bild)</label>
             <div id="editor-front"></div>
           </div>
           <div class="form-section">
-            <label>Backside (Answer/Details)</label>
+            <label>Rückseite (Antwort/Details)</label>
             <div id="editor-back"></div>
           </div>
         </form>

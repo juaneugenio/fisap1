@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,16 +14,16 @@
 
       <div class="nav-container">
         <a href="admin.html" class="nav-link">Dashboard</a>
-        <a onclick="renderCards(null, 'favorites')" class="nav-link">
-          Favorites <span style="color: gold">★</span>
+        <a onclick="loadAndRenderCards(null, 'favorites')" class="nav-link">
+          Favoriten <span style="color: gold">★</span>
           <span id="favCount"></span>
         </a>
       </div>
 
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search term..." />
+        <input type="text" id="searchInput" placeholder="Suchbegriff..." />
         <div class="btn-group">
-          <button class="btn btn-home" id="resetBtn">Home</button>
+          <button class="btn btn-home" id="resetBtn">Startseite</button>
           <button class="btn" id="searchBtn">Suchen</button>
         </div>
         <p id="searchStats" class="search-stats"></p>
