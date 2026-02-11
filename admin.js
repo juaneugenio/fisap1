@@ -74,6 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let catToDeleteName = null;
   let catToEditId = null;
 
+  // Helper to check for admin role from user object
+  function isUserAdmin(user) {
+    return user?.app_metadata?.admin === true;
+  }
+
   // Check session on load
   async function checkSession() {
     const {
@@ -81,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } = await supabaseClient.auth.getSession();
     if (session) {
       // Check for the secure admin claim from the JWT's app_metadata
-      if (session.user.app_metadata?.admin !== true) {
+      if (!isUserAdmin(session.user)) {
         alert("Zugriff verweigert. Sie sind kein Administrator.");
         // Securely log out the user and redirect
         await supabaseClient.auth.signOut();
@@ -109,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
       errorEl.style.display = "block";
     } else {
       // Check for the secure admin claim after login
-      if (data.user.app_metadata?.admin !== true) {
+      if (!isUserAdmin(data.user)) {
         errorEl.textContent =
           "Zugriff verweigert. Sie sind kein Administrator.";
         errorEl.style.display = "block";
