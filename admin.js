@@ -162,6 +162,10 @@ document.addEventListener("DOMContentLoaded", () => {
       .from("categories")
       .select("*")
       .order("name");
+    if (error) {
+      console.error("Fehler beim Laden der Kategorien:", error.message);
+      return;
+    }
     if (data) {
       allCategories = data;
       updateCategorySelect();
@@ -324,6 +328,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const { data, error } = await query;
 
+    if (error) {
+      list.innerHTML = `<p style="color: red;">Fehler: ${error.message}</p>`;
+      return;
+    }
+
     list.innerHTML = "";
 
     if (term && statsEl && data) {
@@ -415,6 +424,12 @@ document.addEventListener("DOMContentLoaded", () => {
       .select("*")
       .eq("id", id)
       .single();
+
+    if (error) {
+      alert("Fehler beim Laden der Karte: " + error.message);
+      return;
+    }
+
     if (data) {
       document.getElementById("formError").style.display = "none";
       document.getElementById("formTitle").textContent =
