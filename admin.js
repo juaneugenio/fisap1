@@ -164,6 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .order("name");
     if (error) {
       console.error("Fehler beim Laden der Kategorien:", error.message);
+      alert("Fehler beim Laden der Kategorien: " + error.message);
       return;
     }
     if (data) {
@@ -329,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const { data, error } = await query;
 
     if (error) {
-      list.innerHTML = `<p style="color: red;">Fehler: ${error.message}</p>`;
+      list.innerHTML = `<p style="color: #ff6b6b;">Fehler beim Laden der Karten: ${error.message}</p>`;
       return;
     }
 
