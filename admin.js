@@ -42,6 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function saveImageToSupabase(file, quillInstance) {
+    // 1. Validation: Limit file size to 2MB
+    const MAX_SIZE = 2 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert("Das Bild ist zu groß. Maximale Größe ist 2MB.");
+      return;
+    }
+
     // Generate unique name: timestamp-random.ext
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -80,23 +87,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Check session on load
-  async function checkSession() {
-    const {
-      data: { session },
-    } = await supabaseClient.auth.getSession();
-    if (session) {
-      // Check for the secure admin claim from the JWT's app_metadata
-      if (!isUserAdmin(session.user)) {
-        alert("Zugriff verweigert. Sie sind kein Administrator.");
-        // Securely log out the user and redirect
-        await supabaseClient.auth.signOut();
-        window.location.href = "index.html";
-        return;
+  function checkSession() {
+    // Listen for auth changes (expiration, sign out, etc.)
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        if (!isUserAdmin(session.user)) {
+          alert("Zugriff verweigert. Sie sind kein Administrator.");
+          await supabaseClient.auth.signOut();
+          window.location.href = "index.html";
+          return;
+        }
+
+        // If we just signed in or already have a session
+        document.getElementById("login-overlay").style.display = "none";
+        loadCategories();
+        showView("dashboard-view");
+      } else {
+        // No session, show login
+        document.getElementById("login-overlay").style.display = "flex";
       }
-      document.getElementById("login-overlay").style.display = "none";
-      loadCategories(); // Load categories on init
-      showView("dashboard-view");
-    }
+    });
   }
 
   async function login() {
@@ -416,8 +426,10 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("categorySelect").value = data.category;
       document.getElementById("tags").value = data.tags || "";
       document.getElementById("frontTitle").value = data.front_title;
-      qFront.clipboard.dangerouslyPasteHTML(data.front_content);
-      qBack.clipboard.dangerouslyPasteHTML(data.back_content);
+
+      // Quill 2.0 compatible HTML loading
+      qFront.setContents(qFront.clipboard.convert(data.front_content));
+      qBack.setContents(qBack.clipboard.convert(data.back_content));
 
       showView("card-form-view");
     }
